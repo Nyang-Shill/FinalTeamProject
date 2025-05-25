@@ -22,9 +22,9 @@ let score = 0;
 const levels = [
     // 난이도 1
     [
-        { img: 'block_images/glassCup.jpeg', scale: 0.2, hp: 2, name: '유리컵' },
-        { img: 'block_images/plate.jpeg', scale: 0.2, hp: 2, name: '그릇' },
-        { img: 'block_images/frame.jpeg', scale: 0.4, hp: 2, name: '액자' },
+        { img: 'block_images/glassCup.jpeg', scale: 0.2, hp: 1, name: '유리컵' },
+        { img: 'block_images/plate.jpeg', scale: 0.2, hp: 1, name: '그릇' },
+        { img: 'block_images/frame.jpeg', scale: 0.4, hp: 1, name: '액자' },
     ],
     // 난이도 2
     [
