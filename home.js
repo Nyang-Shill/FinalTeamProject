@@ -7,6 +7,8 @@ $(document).ready(function () {
     // 테마 변경 버튼 클릭 시 테마 모달 표시
     $('#themeBtn').click(function () {
         $('#themeModal').fadeIn(300);
+        // 초기에는 버튼 비활성화
+        $('#themeConfirmBtn').prop('disabled', true);
     });
 
     // 모달 닫기 버튼
@@ -37,18 +39,22 @@ $(document).ready(function () {
         $(this).addClass('selected');
         console.log(`선택된 ${themeType}: ${themeId}`);
 
-        // 확인 버튼 활성화 (인테리어 또는 냥실이 중 하나라도 선택 시)
-        let selected = false;
+        // 확인 버튼 활성화 (인테리어와 냥실이 모두 선택되어야 함)
+        let interiorSelected = false;
+        let catSelected = false;
+        
         $('.theme-section').each(function() {
-            if ($(this).find('.theme-option.selected').length > 0) {
-                selected = true;
+            const sectionTitle = $(this).find('.theme-title').text();
+            if (sectionTitle.includes('인테리어') && $(this).find('.theme-option.selected').length > 0) {
+                interiorSelected = true;
+            }
+            if (sectionTitle.includes('냥실') && $(this).find('.theme-option.selected').length > 0) {
+                catSelected = true;
             }
         });
-        if (selected) {
-            $('#themeConfirmBtn').prop('disabled', false);
-        } else {
-            $('#themeConfirmBtn').prop('disabled', true);
-        }
+
+        // 두 테마가 모두 선택되었을 때만 버튼 활성화
+        $('#themeConfirmBtn').prop('disabled', !(interiorSelected && catSelected));
     });
 
     // 확인 버튼 클릭 시 모달 닫기

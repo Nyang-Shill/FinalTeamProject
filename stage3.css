@@ -33,7 +33,7 @@ body {
 .stage-title {
   background: #ddd;
   padding: 18px 50px;
-  font-size: 26px;
+  font-size: 30px;
   border-radius: 4px;
   text-align: center;
   margin-bottom: 10px;
@@ -61,7 +61,7 @@ body {
   padding: 18px 0;
   min-width: 160px;
   text-align: center;
-  font-size: 22px;
+  font-size: 26px;
   border-radius: 4px;
 }
 
@@ -103,7 +103,7 @@ body {
   border: none;
   border-radius: 6px;
   padding: 10px 32px;
-  font-size: 20px;
+  font-size: 24px;
   cursor: pointer;
   margin-top: 8px;
   font-family: 'Ownglyph_ParkDaHyun', sans-serif;
@@ -113,7 +113,7 @@ body {
 }
 
 .time-remaining {
-  font-size: 32px;
+  font-size: 36px;
   color: #222;
   text-align: center;
   margin-top: 8px;
@@ -132,7 +132,7 @@ body {
 }
 
 .clear-title {
-  font-size: 28px;
+  font-size: 32px;
   margin-bottom: 40px;
   text-align: center;
 }
@@ -142,7 +142,7 @@ body {
   border: none;
   border-radius: 6px;
   padding: 16px 40px;
-  font-size: 22px;
+  font-size: 26px;
   margin: 16px 0;
   cursor: pointer;
   min-width: 200px;
