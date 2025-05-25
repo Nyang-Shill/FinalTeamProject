@@ -20,6 +20,8 @@ let isRespawning = false;
 let gameStarted = false;
 let score = 0;
 let animationId = null;
+let xinm = 0;
+let sdfjjsl = 0;
 
 // 단계별 벽돌 종류 및 내구도 설정
 const levels = [
