@@ -1,0 +1,205 @@
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    font-family: sans-serif;
+    background-color: #fff8e6;
+}
+  
+.container {
+    padding: 20px;
+    height: 100%;
+}
+    
+.main {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+}
+  
+.logo {
+    background-color: #ddd;
+    padding: 60px 120px;
+    margin-bottom: 60px;
+    font-size: 32px;
+    font-weight: bold;
+}
+  
+button {
+    background-color: #ccc;
+    border: none;
+    padding: 20px 40px;
+    margin: 15px 0;
+    cursor: pointer;
+    font-size: 24px;
+    border-radius: 8px;
+    min-width: 200px;
+}
+  
+button:hover {
+    background-color: #bbb;
+}
+  
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal {
+    background-color: white;
+    padding: 32px;
+    border-radius: 14px;
+    min-width: 420px;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 5px;
+    min-width: auto;
+    color: #666;
+}
+
+.modal-close:hover {
+    color: #000;
+}
+
+.modal-title {
+    text-align: center;
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.theme-section {
+    margin: 20px 0;
+}
+
+.theme-title {
+    font-size: 16px;
+    margin-bottom: 15px;
+    color: #666;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+}
+
+.theme-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.theme-option {
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    padding: 5px;
+    cursor: pointer;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    background-color: #f8f8f8;
+    overflow: hidden;
+    max-width: 110px;
+    max-height: 110px;
+}
+
+.theme-option img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+}
+
+.theme-option:hover {
+    border-color: #666;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.theme-option:hover img {
+    transform: scale(1.05);
+}
+
+.theme-option.selected {
+    border-color: #000;
+    border-width: 3px;
+    padding: 4px;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 스테이지 모달 스타일 */
+.stage-modal {
+    min-width: 350px;
+    padding: 25px;
+}
+
+.stage-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.stage-item {
+    background-color: white;
+    border: 2px solid #987;
+    border-radius: 15px;
+    padding: 15px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.stage-item:hover {
+    transform: translateX(5px);
+    background-color: #fff8e6;
+    border-color: #654;
+}
+
+.stage-name {
+    font-size: 18px;
+    color: #333;
+}
+
+.stage-status, .stage-arrow {
+    color: #987;
+    font-size: 16px;
+}
+
+.stage-item:hover .stage-status,
+.stage-item:hover .stage-arrow {
+    color: #654;
+}
+
+#themeConfirmBtn {
+    margin-top: 28px;
+    font-size: 20px;
+    padding: 12px 38px;
+    border-radius: 7px;
+}
+  
