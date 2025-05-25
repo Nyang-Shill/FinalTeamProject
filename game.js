@@ -3,14 +3,14 @@ const ctx = canvas.getContext('2d');
 const BASE_SPEED_X = 5;
 const BASE_SPEED_Y = -5;
 let bricks = [];
-const paddleHeight = 12;
+const paddleHeight = 70;
 const paddleWidth = 80;
 let paddleX = (canvas.width - paddleWidth) / 2;
 let rightPressed = false;
 let leftPressed = false;
 let ballRadius = 15;
 let x = canvas.width / 2;
-let y = canvas.height - 30;
+let y = canvas.height - 100;
 let dx = BASE_SPEED_X;
 let dy = BASE_SPEED_Y;
 let lives = 3;
@@ -21,6 +21,7 @@ let gameStarted = false;
 let score = 0;
 let animationId = null;
 
+// 공 이미지 관리
 const ballImages = {
     ball1: new Image(),
     ball2: new Image(),
@@ -29,29 +30,63 @@ const ballImages = {
 ballImages.ball1.src = 'ball_images/ball1.PNG';
 ballImages.ball2.src = 'ball_images/ball2.PNG';
 ballImages.ball3.src = 'ball_images/ball3.PNG';
-let currentBallImage = ballImages.ball1;
+let currentBallImage = ballImages.ball1; // 기본값으로 ball1 설정
 
+// paddle 이미지 관리
+const paddleImages = {
+    paddle1: new Image(),
+    paddle2: new Image(),
+    paddle3: new Image()
+};
+
+// 이미지 로드 에러 처리
+function handleImageError(img) {
+    console.log('이미지 로드 실패:', img.src);
+    return false;
+}
+
+// 이미지 로드 설정
+paddleImages.paddle1.onerror = () => handleImageError(paddleImages.paddle1);
+paddleImages.paddle2.onerror = () => handleImageError(paddleImages.paddle2);
+paddleImages.paddle3.onerror = () => handleImageError(paddleImages.paddle3);
+
+paddleImages.paddle1.src = 'paddle_images/paddle1.PNG';
+paddleImages.paddle2.src = 'paddle_images/paddle2.PNG';
+paddleImages.paddle3.src = 'paddle_images/paddle3.PNG';
+
+let currentPaddleImage = paddleImages.paddle1; // 기본값으로 paddle1 설정
+
+// 테마 선택에 따른 공과 paddle 이미지 변경 함수
 function changeBallImage(theme) {
-    switch (theme) {
+    console.log('changeBallImage 호출됨, 테마:', theme);
+    switch(theme) {
         case 'cat1':
+            console.log('ball1, paddle1 이미지로 변경');
             currentBallImage = ballImages.ball1;
+            currentPaddleImage = paddleImages.paddle1;
             break;
         case 'cat2':
+            console.log('ball2, paddle2 이미지로 변경');
             currentBallImage = ballImages.ball2;
+            currentPaddleImage = paddleImages.paddle2;
             break;
         case 'cat3':
+            console.log('ball3, paddle3 이미지로 변경');
             currentBallImage = ballImages.ball3;
+            currentPaddleImage = paddleImages.paddle3;
             break;
         default:
+            console.log('기본 ball1, paddle1 이미지로 변경');
             currentBallImage = ballImages.ball1;
+            currentPaddleImage = paddleImages.paddle1;
     }
 }
 
 const levels = [
     [
-        { img: 'block_images/glassCup.jpeg', scale: 0.2, hp: 1, name: '유리컵' },
-        { img: 'block_images/plate.jpeg', scale: 0.2, hp: 1, name: '그릇' },
-        { img: 'block_images/frame.jpeg', scale: 0.4, hp: 1, name: '액자' },
+        { img: 'block_images/glassCup_1.PNG', scale: 0.2, hp: 1, name: '유리컵' },
+        { img: 'block_images/plate1_1.PNG', scale: 0.2, hp: 1, name: '그릇' },
+        { img: 'block_images/frame2_1.PNG', scale: 0.4, hp: 1, name: '액자' },
     ],
     [
         { img: 'block_images/glassCup.jpeg', scale: 0.3, hp: 1, name: '유리컵' },
@@ -73,18 +108,27 @@ let brickTypes = levels[currentLevel];
 const brickImages = {};
 let imagesToLoad = 0;
 let imagesLoaded = 0;
-levels.flat().forEach((type) => {
-    if (!brickImages[type.img]) {
+
+// 깨지는 이미지도 미리 로드
+const breakImages = [
+    'block_images/glassCup_2.PNG',
+    'block_images/plate1_2.PNG',
+    'block_images/frame2_2.PNG'
+];
+
+// 기존 이미지와 깨지는 이미지 모두 로드
+[...levels.flat().map(type => type.img), ...breakImages].forEach((imgPath) => {
+    if (!brickImages[imgPath]) {
         imagesToLoad++;
         const image = new Image();
-        image.src = type.img;
+        image.src = imgPath;
         image.onload = () => {
             imagesLoaded++;
             if (imagesLoaded === imagesToLoad) {
                 randomPlaceBricks();
             }
         };
-        brickImages[type.img] = image;
+        brickImages[imgPath] = image;
     }
 });
 
@@ -174,6 +218,12 @@ function drawBricks() {
                 ctx.fillRect(brick.x, brick.y, brick.w, brick.h);
                 ctx.restore();
             }
+        } else if (brick.status === 2) {
+            // 깨지는 중인 상태일 때
+            let breakImg = brickImages[brick.breakImg];
+            if (breakImg && breakImg.complete && breakImg.naturalWidth && breakImg.naturalHeight) {
+                ctx.drawImage(breakImg, brick.x, brick.y, brick.w, brick.h);
+            }
         }
     }
 }
@@ -191,11 +241,24 @@ function drawBall() {
 }
 
 function drawPaddle() {
-    ctx.beginPath();
-    ctx.rect(paddleX, canvas.height - paddleHeight - 8, paddleWidth, paddleHeight);
-    ctx.fillStyle = '#3a8dde';
-    ctx.fill();
-    ctx.closePath();
+    if (currentPaddleImage && currentPaddleImage.complete && !currentPaddleImage.naturalWidth) {
+        // 이미지가 로드되지 않은 경우 기본 사각형으로 표시
+        ctx.beginPath();
+        ctx.rect(paddleX, canvas.height - paddleHeight - 8, paddleWidth, paddleHeight);
+        ctx.fillStyle = '#3a8dde';
+        ctx.fill();
+        ctx.closePath();
+    } else if (currentPaddleImage && currentPaddleImage.complete) {
+        // 이미지가 성공적으로 로드된 경우
+        ctx.drawImage(currentPaddleImage, paddleX, canvas.height - paddleHeight - 8, paddleWidth, paddleHeight);
+    } else {
+        // 이미지 로드 중인 경우 기본 사각형으로 표시
+        ctx.beginPath();
+        ctx.rect(paddleX, canvas.height - paddleHeight - 8, paddleWidth, paddleHeight);
+        ctx.fillStyle = '#3a8dde';
+        ctx.fill();
+        ctx.closePath();
+    }
 }
 
 function collisionDetection() {
@@ -205,7 +268,23 @@ function collisionDetection() {
                 dy = -dy;
                 brick.hp--;
                 if (brick.hp <= 0) {
-                    brick.status = 0;
+                    // 벽돌이 깨질 때 애니메이션 시작
+                    brick.status = 2; // 2는 깨지는 중 상태
+                    brick.breakStartTime = Date.now();
+                    // 깨지는 이미지로 변경
+                    if (brick.img.includes('glassCup_1')) {
+                        brick.breakImg = 'block_images/glassCup_2.PNG';
+                    } else if (brick.img.includes('plate1_1')) {
+                        brick.breakImg = 'block_images/plate1_2.PNG';
+                    } else if (brick.img.includes('frame2_1')) {
+                        brick.breakImg = 'block_images/frame2_2.PNG';
+                    }
+                    // 0.5초 후에 완전히 사라지도록 설정
+                    setTimeout(() => {
+                        brick.status = 0;
+                    }, 300);
+                    
+                    // 벽돌이 깨질 때, 해당 벽돌의 최초 hp만큼 점수 증가
                     const maxHp = levels[currentLevel].find((t) => t.img === brick.img).hp;
                     score += maxHp;
                     $('#score-box').text(score);
@@ -238,9 +317,11 @@ function draw() {
     drawPaddle();
     collisionDetection();
 
+
     if (isRespawning) return;
 
     if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
+
     if (y + dy < ballRadius) {
         dy = -dy;
     } else if (y + dy > canvas.height - ballRadius - paddleHeight - 8) {
@@ -258,7 +339,7 @@ function draw() {
                 isRespawning = true;
                 setTimeout(() => {
                     x = canvas.width / 2;
-                    y = canvas.height - 30;
+                    y = canvas.height - paddleHeight - 15;
                     dx = BASE_SPEED_X * (Math.random() > 0.5 ? 1 : -1);
                     dy = BASE_SPEED_Y;
                     paddleX = (canvas.width - paddleWidth) / 2;
@@ -298,7 +379,8 @@ function restartGame() {
     isGameOver = false;
     isGameClear = false;
     x = canvas.width / 2;
-    y = canvas.height - 30;
+    y = canvas.height - paddleHeight - 15;
+
     dx = BASE_SPEED_X * (Math.random() > 0.5 ? 1 : -1);
     dy = BASE_SPEED_Y;
     paddleX = (canvas.width - paddleWidth) / 2;
