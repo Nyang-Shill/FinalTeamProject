@@ -1,5 +1,7 @@
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
+const BASE_SPEED_X = 5;
+const BASE_SPEED_Y = -5;
 let bricks = [];
 const paddleHeight = 12;
 const paddleWidth = 80;
@@ -9,20 +11,21 @@ let leftPressed = false;
 let ballRadius = 15;
 let x = canvas.width / 2;
 let y = canvas.height - 30;
-let dx = 5;
-let dy = -5;
+let dx = BASE_SPEED_X;
+let dy = BASE_SPEED_Y;
 let lives = 3;
 let isGameOver = false;
 let isGameClear = false;
 let isRespawning = false;
 let gameStarted = false;
 let score = 0;
+let animationId = null;
 
 // 공 이미지 관리
 const ballImages = {
     ball1: new Image(),
     ball2: new Image(),
-    ball3: new Image()
+    ball3: new Image(),
 };
 ballImages.ball1.src = 'ball_images/ball1.PNG';
 ballImages.ball2.src = 'ball_images/ball2.PNG';
@@ -32,7 +35,7 @@ let currentBallImage = ballImages.ball1; // 기본값으로 ball1 설정
 // 테마 선택에 따른 공 이미지 변경 함수
 function changeBallImage(theme) {
     console.log('changeBallImage 호출됨, 테마:', theme);
-    switch(theme) {
+    switch (theme) {
         case 'cat1':
             console.log('ball1 이미지로 변경');
             currentBallImage = ballImages.ball1;
@@ -259,6 +262,9 @@ function isAllBricksCleared() {
     return true;
 }
 function draw() {
+    if (animationId) cancelAnimationFrame(animationId); // 이전 루프 중단
+    animationId = requestAnimationFrame(draw);
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBricks();
     if (!isRespawning) {
@@ -266,22 +272,47 @@ function draw() {
     }
     drawPaddle();
     collisionDetection();
-    if (isGameClear) {
-        ctx.font = '28px Pretendard, Arial';
-        ctx.fillStyle = '#ffd54f';
-        ctx.fillText('축하합니다! 클리어!', canvas.width / 2 - 110, canvas.height / 2);
-        return;
-    }
-    if (isGameOver) {
-        ctx.font = '28px Pretendard, Arial';
-        ctx.fillStyle = '#e57373';
-        ctx.fillText('게임 오버', canvas.width / 2 - 70, canvas.height / 2);
-        return;
-    }
-    if (isRespawning) {
-        requestAnimationFrame(draw);
-        return;
-    }
+
+    // if (isGameClear) {
+    //     ctx.font = '28px Pretendard, Arial';
+    //     ctx.fillStyle = '#ffd54f';
+    //     ctx.fillText('축하합니다! 클리어!', canvas.width / 2 - 110, canvas.height / 2);
+    //     cancelAnimationFrame(animationId); // 루프 멈춤
+    //     animationId = null;
+    //     return;
+    // }
+    // if (isGameOver) {
+    //     ctx.font = '28px Pretendard, Arial';
+    //     ctx.fillStyle = '#e57373';
+    //     ctx.fillText('게임 오버', canvas.width / 2 - 70, canvas.height / 2);
+    //     cancelAnimationFrame(animationId); // 루프 멈춤
+    //     animationId = null;
+    //     return;
+    // }
+    if (isRespawning) return; // 루프는 유지하되 일시정지
+    // ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // drawBricks();
+    // if (!isRespawning) {
+    //     drawBall();
+    // }
+    // drawPaddle();
+    // collisionDetection();
+    // // if (isGameClear) {
+    // //     ctx.font = '28px Pretendard, Arial';
+    // //     ctx.fillStyle = '#ffd54f';
+    // //     ctx.fillText('축하합니다! 클리어!', canvas.width / 2 - 110, canvas.height / 2);
+    // //     return;
+    // // }
+    // // if (isGameOver) {
+    // //     ctx.font = '28px Pretendard, Arial';
+    // //     ctx.fillStyle = '#e57373';
+    // //     ctx.fillText('게임 오버', canvas.width / 2 - 70, canvas.height / 2);
+    // //     return;
+    // // }
+    // if (isRespawning) {
+    //     requestAnimationFrame(draw);
+    //     return;
+
     if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
         dx = -dx;
     }
@@ -300,13 +331,15 @@ function draw() {
                 setTimeout(() => {
                     x = canvas.width / 2;
                     y = canvas.height - 30;
-                    dx = 3 * (Math.random() > 0.5 ? 1 : -1);
-                    dy = -3;
+                    // dx = 3 * (Math.random() > 0.5 ? 1 : -1);
+                    // dy = -3;
+                    dx = BASE_SPEED_X * (Math.random() > 0.5 ? 1 : -1); // 방향만 랜덤, 속도는 고정
+                    dy = BASE_SPEED_Y;
                     paddleX = (canvas.width - paddleWidth) / 2;
                     isRespawning = false;
-                    draw();
+                    // draw();
                 }, 3000);
-                requestAnimationFrame(draw);
+                // requestAnimationFrame(draw);
                 return;
             }
         }
@@ -318,8 +351,9 @@ function draw() {
     } else if (leftPressed && paddleX > 0) {
         paddleX -= 7;
     }
-    requestAnimationFrame(draw);
 }
+// requestAnimationFrame(draw);
+
 function keyDownHandler(e) {
     if (e.key === 'Right' || e.key === 'ArrowRight') {
         rightPressed = true;
@@ -345,8 +379,8 @@ function restartGame() {
     isGameClear = false;
     x = canvas.width / 2;
     y = canvas.height - 30;
-    dx = 3 * (Math.random() > 0.5 ? 1 : -1);
-    dy = -3;
+    dx = BASE_SPEED_X * (Math.random() > 0.5 ? 1 : -1); // 방향만 랜덤, 속도는 고정
+    dy = BASE_SPEED_Y;
     paddleX = (canvas.width - paddleWidth) / 2;
     currentLevel = 0;
     brickTypes = levels[currentLevel];
