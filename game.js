@@ -82,34 +82,29 @@ function changeBallImage(theme) {
     }
 }
 
-// 단계별 벽돌 종류 및 내구도 설정
 const levels = [
-    // 난이도 1
     [
         { img: 'block_images/glassCup_1.PNG', scale: 0.2, hp: 1, name: '유리컵' },
         { img: 'block_images/plate1_1.PNG', scale: 0.2, hp: 1, name: '그릇' },
         { img: 'block_images/frame2_1.PNG', scale: 0.4, hp: 1, name: '액자' },
     ],
-    // 난이도 2
     [
         { img: 'block_images/glassCup.jpeg', scale: 0.3, hp: 1, name: '유리컵' },
         { img: 'block_images/plate.jpeg', scale: 0.2, hp: 2, name: '그릇' },
         { img: 'block_images/frame.jpeg', scale: 0.1, hp: 2, name: '액자' },
         { img: 'block_images/box.jpeg', scale: 0.2, hp: 3, name: '택배박스' },
     ],
-    // 난이도 3
     [
         { img: 'block_images/glassCup.jpeg', scale: 0.3, hp: 1, name: '유리컵' },
         { img: 'block_images/plate.jpeg', scale: 0.2, hp: 2, name: '그릇' },
         { img: 'block_images/frame.jpeg', scale: 0.1, hp: 2, name: '액자' },
         { img: 'block_images/box.jpeg', scale: 0.2, hp: 3, name: '택배박스' },
-        { img: 'block_images/macbook.jpeg', scale: 0.2, hp: 30, name: '노트북' }, // BOSS
+        { img: 'block_images/macbook.jpeg', scale: 0.2, hp: 30, name: '노트북' },
     ],
 ];
 let currentLevel = 0;
 let brickTypes = levels[currentLevel];
 
-// 이미지 미리 로드 (모든 레벨의 벽돌 이미지)
 const brickImages = {};
 let imagesToLoad = 0;
 let imagesLoaded = 0;
@@ -146,14 +141,14 @@ function startGame() {
     $('#restartBtn').click(restartGame);
     draw();
 }
-const cellSize = 5; // 셀 한 칸의 크기(px)
+
+const cellSize = 5;
 const gridRows = Math.floor(canvas.height / cellSize);
 const gridCols = Math.floor(canvas.width / cellSize);
-const brickAreaRows = Math.floor(gridRows * 0.4); // 위쪽 40%만 사용
+const brickAreaRows = Math.floor(gridRows * 0.4);
 let grid = Array.from({ length: gridRows }, () => Array(gridCols).fill(0));
 
 function canPlaceBrick(row, col, brickW, brickH) {
-    // brickW, brickH는 셀 단위
     if (row + brickH > brickAreaRows || col + brickW > gridCols) return false;
     for (let i = 0; i < brickH; i++) {
         for (let j = 0; j < brickW; j++) {
@@ -169,7 +164,6 @@ function placeBrick(row, col, brickW, brickH, brickObj) {
             grid[row + i][col + j] = 1;
         }
     }
-    // 실제 픽셀 좌표로 변환해서 bricks 배열에 추가
     bricks.push({
         x: col * cellSize,
         y: row * cellSize,
@@ -182,12 +176,9 @@ function placeBrick(row, col, brickW, brickH, brickObj) {
     });
 }
 
-// 벽돌 랜덤 배치
 function randomPlaceBricks() {
-    // bricks = [];
     grid = Array.from({ length: gridRows }, () => Array(gridCols).fill(0));
     for (let n = 0; n < 1000; n++) {
-        // 충분히 반복
         let type = brickTypes[Math.floor(Math.random() * brickTypes.length)];
         let img = brickImages[type.img];
         let scale = type.scale || 1;
@@ -199,33 +190,17 @@ function randomPlaceBricks() {
             let row = Math.floor(Math.random() * (brickAreaRows - brickH));
             let col = Math.floor(Math.random() * (gridCols - brickW));
             if (canPlaceBrick(row, col, brickW, brickH)) {
-                // 내구도(hp) 추가
-                bricks.push({
-                    x: col * cellSize,
-                    y: row * cellSize,
-                    w: brickW * cellSize,
-                    h: brickH * cellSize,
-                    img: type.img,
-                    status: 1,
-                    hp: type.hp,
-                    name: type.name,
-                });
-                for (let i = 0; i < brickH; i++) {
-                    for (let j = 0; j < brickW; j++) {
-                        grid[row + i][col + j] = 1;
-                    }
-                }
+                placeBrick(row, col, brickW, brickH, type);
                 placed = true;
             }
             tries++;
         }
-        // 공간이 부족하면 break
         if (!placed) break;
     }
 }
+
 function drawBricks() {
-    for (let r = 0; r < bricks.length; r++) {
-        let brick = bricks[r];
+    for (let brick of bricks) {
         if (brick.status === 1) {
             let img = brickImages[brick.img];
             if (img && img.complete && img.naturalWidth && img.naturalHeight) {
@@ -234,7 +209,6 @@ function drawBricks() {
                 ctx.fillStyle = '#888';
                 ctx.fillRect(brick.x, brick.y, brick.w, brick.h);
             }
-            // 깨지고 있다는 효과: 내구도가 줄어들수록 어두운 레이어를 덮음
             const maxHp = levels[currentLevel].find((t) => t.img === brick.img).hp;
             if (brick.hp < maxHp && brick.hp > 0) {
                 ctx.save();
@@ -253,11 +227,11 @@ function drawBricks() {
         }
     }
 }
+
 function drawBall() {
     if (currentBallImage.complete) {
         ctx.drawImage(currentBallImage, x - ballRadius, y - ballRadius, ballRadius * 2, ballRadius * 2);
     } else {
-        // 이미지가 로드되지 않은 경우 기본 원형으로 표시
         ctx.beginPath();
         ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
         ctx.fillStyle = '#000';
@@ -265,6 +239,7 @@ function drawBall() {
         ctx.closePath();
     }
 }
+
 function drawPaddle() {
     if (currentPaddleImage && currentPaddleImage.complete && !currentPaddleImage.naturalWidth) {
         // 이미지가 로드되지 않은 경우 기본 사각형으로 표시
@@ -287,8 +262,7 @@ function drawPaddle() {
 }
 
 function collisionDetection() {
-    for (let r = 0; r < bricks.length; r++) {
-        let brick = bricks[r];
+    for (let brick of bricks) {
         if (brick.status === 1) {
             if (x > brick.x && x < brick.x + brick.w && y > brick.y && y < brick.y + brick.h) {
                 dy = -dy;
@@ -313,36 +287,41 @@ function collisionDetection() {
                     // 벽돌이 깨질 때, 해당 벽돌의 최초 hp만큼 점수 증가
                     const maxHp = levels[currentLevel].find((t) => t.img === brick.img).hp;
                     score += maxHp;
+                    $('#score-box').text(score);
                     if (isAllBricksCleared()) {
                         isGameClear = true;
+                        cancelAnimationFrame(animationId);
+                        animationId = null;
                         $('#restartBtn').show();
+                        $('#clear-modal').fadeIn(200);
                     }
                 }
             }
         }
     }
 }
+
 function isAllBricksCleared() {
-    for (let r = 0; r < bricks.length; r++) {
-        if (bricks[r].status === 1) return false;
-    }
-    return true;
+    return bricks.every((brick) => brick.status === 0);
 }
+
 function draw() {
-    if (animationId) cancelAnimationFrame(animationId); // 이전 루프 중단
+    if (animationId) cancelAnimationFrame(animationId);
     animationId = requestAnimationFrame(draw);
+
+    if (isGameClear || isGameOver) return;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBricks();
-    if (!isRespawning) {
-        drawBall();
-    }
+    if (!isRespawning) drawBall();
     drawPaddle();
     collisionDetection();
 
-    if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
-        dx = -dx;
-    }
+
+    if (isRespawning) return;
+
+    if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
+
     if (y + dy < ballRadius) {
         dy = -dy;
     } else if (y + dy > canvas.height - ballRadius - paddleHeight - 8) {
@@ -352,7 +331,10 @@ function draw() {
             lives--;
             if (!lives) {
                 isGameOver = true;
+                cancelAnimationFrame(animationId);
+                animationId = null;
                 $('#restartBtn').show();
+                return;
             } else {
                 isRespawning = true;
                 setTimeout(() => {
@@ -367,8 +349,10 @@ function draw() {
             }
         }
     }
+
     x += dx;
     y += dy;
+
     if (rightPressed && paddleX < canvas.width - paddleWidth) {
         paddleX += 7;
     } else if (leftPressed && paddleX > 0) {
@@ -377,30 +361,26 @@ function draw() {
 }
 
 function keyDownHandler(e) {
-    if (e.key === 'Right' || e.key === 'ArrowRight') {
-        rightPressed = true;
-    } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
-        leftPressed = true;
-    }
+    if (e.key === 'Right' || e.key === 'ArrowRight') rightPressed = true;
+    else if (e.key === 'Left' || e.key === 'ArrowLeft') leftPressed = true;
 }
+
 function keyUpHandler(e) {
-    if (e.key === 'Right' || e.key === 'ArrowRight') {
-        rightPressed = false;
-    } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
-        leftPressed = false;
-    }
+    if (e.key === 'Right' || e.key === 'ArrowRight') rightPressed = false;
+    else if (e.key === 'Left' || e.key === 'ArrowLeft') leftPressed = false;
 }
+
 function mouseMoveHandler(e) {
     let relativeX = e.clientX - canvas.getBoundingClientRect().left;
-    if (relativeX > 0 && relativeX < canvas.width) {
-        paddleX = relativeX - paddleWidth / 2;
-    }
+    if (relativeX > 0 && relativeX < canvas.width) paddleX = relativeX - paddleWidth / 2;
 }
+
 function restartGame() {
     isGameOver = false;
     isGameClear = false;
     x = canvas.width / 2;
     y = canvas.height - paddleHeight - 15;
+
     dx = BASE_SPEED_X * (Math.random() > 0.5 ? 1 : -1);
     dy = BASE_SPEED_Y;
     paddleX = (canvas.width - paddleWidth) / 2;
@@ -408,5 +388,7 @@ function restartGame() {
     brickTypes = levels[currentLevel];
     randomPlaceBricks();
     $('#restartBtn').hide();
+    score = 0;
+    $('#score-box').text(score);
     draw();
 }

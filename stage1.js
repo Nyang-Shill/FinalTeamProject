@@ -10,7 +10,7 @@ $(document).ready(function () {
     // 저장된 테마 적용
     const selectedCatTheme = localStorage.getItem('selectedCatTheme');
     console.log('stage1에서 읽은 테마:', selectedCatTheme); // 읽은 값 확인
-    
+
     if (selectedCatTheme) {
         // 테마 값이 'cat1', 'cat2', 'cat3'인 경우에만 적용
         if (selectedCatTheme === 'cat1' || selectedCatTheme === 'cat2' || selectedCatTheme === 'cat3') {
@@ -55,6 +55,7 @@ $(document).ready(function () {
             if (timeLeft <= 0) {
                 clearInterval(timerInterval);
                 showClearModal();
+                isGameClear = true;
             }
         }, 1000);
     }
