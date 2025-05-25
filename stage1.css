@@ -1,7 +1,14 @@
+@font-face {
+    font-family: 'Ownglyph_ParkDaHyun';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2411-3@1.0/Ownglyph_ParkDaHyun.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
 body {
   margin: 0;
   background-color: #fff8e6;
-  font-family: sans-serif;
+  font-family: 'Ownglyph_ParkDaHyun', sans-serif;
   height: 100vh;
 }
 
@@ -99,6 +106,7 @@ body {
   font-size: 20px;
   cursor: pointer;
   margin-top: 8px;
+  font-family: 'Ownglyph_ParkDaHyun', sans-serif;
 }
 #skip-btn:hover {
   background: #555;
@@ -138,6 +146,7 @@ body {
   margin: 16px 0;
   cursor: pointer;
   min-width: 200px;
+  font-family: 'Ownglyph_ParkDaHyun', sans-serif;
 }
 
 #clear-modal button:hover {
