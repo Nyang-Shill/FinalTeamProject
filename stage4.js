@@ -1,4 +1,15 @@
 $(document).ready(function () {
+  // 저장된 테마 적용
+  const selectedCatTheme = localStorage.getItem('selectedCatTheme');
+  console.log('stage4에서 읽은 테마:', selectedCatTheme);
+  
+  if (selectedCatTheme) {
+    if (selectedCatTheme === 'cat1' || selectedCatTheme === 'cat2' || selectedCatTheme === 'cat3') {
+      console.log('테마 적용:', selectedCatTheme);
+      changeBallImage(selectedCatTheme);
+    }
+  }
+
   // 캔버스 안내 텍스트
   const canvas = document.getElementById('game-canvas');
   const ctx = canvas.getContext('2d');

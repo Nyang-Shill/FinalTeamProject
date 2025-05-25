@@ -1,25 +1,55 @@
 const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
-const BASE_SPEED_X = 5;
-const BASE_SPEED_Y = -5;
 let bricks = [];
 const paddleHeight = 12;
 const paddleWidth = 80;
 let paddleX = (canvas.width - paddleWidth) / 2;
 let rightPressed = false;
 let leftPressed = false;
-let ballRadius = 8;
+let ballRadius = 15;
 let x = canvas.width / 2;
 let y = canvas.height - 30;
-let dx = BASE_SPEED_X;
-let dy = BASE_SPEED_Y;
+let dx = 5;
+let dy = -5;
 let lives = 3;
 let isGameOver = false;
 let isGameClear = false;
 let isRespawning = false;
 let gameStarted = false;
 let score = 0;
-let animationId = null;
+
+// 공 이미지 관리
+const ballImages = {
+    ball1: new Image(),
+    ball2: new Image(),
+    ball3: new Image()
+};
+ballImages.ball1.src = 'ball_images/ball1.PNG';
+ballImages.ball2.src = 'ball_images/ball2.PNG';
+ballImages.ball3.src = 'ball_images/ball3.PNG';
+let currentBallImage = ballImages.ball1; // 기본값으로 ball1 설정
+
+// 테마 선택에 따른 공 이미지 변경 함수
+function changeBallImage(theme) {
+    console.log('changeBallImage 호출됨, 테마:', theme);
+    switch(theme) {
+        case 'cat1':
+            console.log('ball1 이미지로 변경');
+            currentBallImage = ballImages.ball1;
+            break;
+        case 'cat2':
+            console.log('ball2 이미지로 변경');
+            currentBallImage = ballImages.ball2;
+            break;
+        case 'cat3':
+            console.log('ball3 이미지로 변경');
+            currentBallImage = ballImages.ball3;
+            break;
+        default:
+            console.log('기본 ball1 이미지로 변경');
+            currentBallImage = ballImages.ball1;
+    }
+}
 
 // 단계별 벽돌 종류 및 내구도 설정
 const levels = [
@@ -182,11 +212,16 @@ function drawBricks() {
     }
 }
 function drawBall() {
-    ctx.beginPath();
-    ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
-    ctx.fillStyle = '#000';
-    ctx.fill();
-    ctx.closePath();
+    if (currentBallImage.complete) {
+        ctx.drawImage(currentBallImage, x - ballRadius, y - ballRadius, ballRadius * 2, ballRadius * 2);
+    } else {
+        // 이미지가 로드되지 않은 경우 기본 원형으로 표시
+        ctx.beginPath();
+        ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+        ctx.fillStyle = '#000';
+        ctx.fill();
+        ctx.closePath();
+    }
 }
 function drawPaddle() {
     ctx.beginPath();
@@ -224,9 +259,6 @@ function isAllBricksCleared() {
     return true;
 }
 function draw() {
-    if (animationId) cancelAnimationFrame(animationId); // 이전 루프 중단
-    animationId = requestAnimationFrame(draw);
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBricks();
     if (!isRespawning) {
@@ -234,47 +266,22 @@ function draw() {
     }
     drawPaddle();
     collisionDetection();
-
-    // if (isGameClear) {
-    //     ctx.font = '28px Pretendard, Arial';
-    //     ctx.fillStyle = '#ffd54f';
-    //     ctx.fillText('축하합니다! 클리어!', canvas.width / 2 - 110, canvas.height / 2);
-    //     cancelAnimationFrame(animationId); // 루프 멈춤
-    //     animationId = null;
-    //     return;
-    // }
-    // if (isGameOver) {
-    //     ctx.font = '28px Pretendard, Arial';
-    //     ctx.fillStyle = '#e57373';
-    //     ctx.fillText('게임 오버', canvas.width / 2 - 70, canvas.height / 2);
-    //     cancelAnimationFrame(animationId); // 루프 멈춤
-    //     animationId = null;
-    //     return;
-    // }
-    if (isRespawning) return; // 루프는 유지하되 일시정지
-    // ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // drawBricks();
-    // if (!isRespawning) {
-    //     drawBall();
-    // }
-    // drawPaddle();
-    // collisionDetection();
-    // // if (isGameClear) {
-    // //     ctx.font = '28px Pretendard, Arial';
-    // //     ctx.fillStyle = '#ffd54f';
-    // //     ctx.fillText('축하합니다! 클리어!', canvas.width / 2 - 110, canvas.height / 2);
-    // //     return;
-    // // }
-    // // if (isGameOver) {
-    // //     ctx.font = '28px Pretendard, Arial';
-    // //     ctx.fillStyle = '#e57373';
-    // //     ctx.fillText('게임 오버', canvas.width / 2 - 70, canvas.height / 2);
-    // //     return;
-    // // }
-    // if (isRespawning) {
-    //     requestAnimationFrame(draw);
-    //     return;
-
+    if (isGameClear) {
+        ctx.font = '28px Pretendard, Arial';
+        ctx.fillStyle = '#ffd54f';
+        ctx.fillText('축하합니다! 클리어!', canvas.width / 2 - 110, canvas.height / 2);
+        return;
+    }
+    if (isGameOver) {
+        ctx.font = '28px Pretendard, Arial';
+        ctx.fillStyle = '#e57373';
+        ctx.fillText('게임 오버', canvas.width / 2 - 70, canvas.height / 2);
+        return;
+    }
+    if (isRespawning) {
+        requestAnimationFrame(draw);
+        return;
+    }
     if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
         dx = -dx;
     }
@@ -293,15 +300,13 @@ function draw() {
                 setTimeout(() => {
                     x = canvas.width / 2;
                     y = canvas.height - 30;
-                    // dx = 3 * (Math.random() > 0.5 ? 1 : -1);
-                    // dy = -3;
-                    dx = BASE_SPEED_X * (Math.random() > 0.5 ? 1 : -1); // 방향만 랜덤, 속도는 고정
-                    dy = BASE_SPEED_Y;
+                    dx = 3 * (Math.random() > 0.5 ? 1 : -1);
+                    dy = -3;
                     paddleX = (canvas.width - paddleWidth) / 2;
                     isRespawning = false;
-                    // draw();
+                    draw();
                 }, 3000);
-                // requestAnimationFrame(draw);
+                requestAnimationFrame(draw);
                 return;
             }
         }
@@ -313,9 +318,8 @@ function draw() {
     } else if (leftPressed && paddleX > 0) {
         paddleX -= 7;
     }
+    requestAnimationFrame(draw);
 }
-// requestAnimationFrame(draw);
-
 function keyDownHandler(e) {
     if (e.key === 'Right' || e.key === 'ArrowRight') {
         rightPressed = true;
@@ -341,8 +345,8 @@ function restartGame() {
     isGameClear = false;
     x = canvas.width / 2;
     y = canvas.height - 30;
-    dx = BASE_SPEED_X * (Math.random() > 0.5 ? 1 : -1); // 방향만 랜덤, 속도는 고정
-    dy = BASE_SPEED_Y;
+    dx = 3 * (Math.random() > 0.5 ? 1 : -1);
+    dy = -3;
     paddleX = (canvas.width - paddleWidth) / 2;
     currentLevel = 0;
     brickTypes = levels[currentLevel];

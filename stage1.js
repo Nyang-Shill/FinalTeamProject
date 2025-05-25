@@ -7,6 +7,18 @@ $(document).ready(function () {
     // ctx.textAlign = 'center';
     // ctx.fillText('여기서 게임이 시작됩니다!', canvas.width/2, canvas.height/2);
 
+    // 저장된 테마 적용
+    const selectedCatTheme = localStorage.getItem('selectedCatTheme');
+    console.log('stage1에서 읽은 테마:', selectedCatTheme); // 읽은 값 확인
+    
+    if (selectedCatTheme) {
+        // 테마 값이 'cat1', 'cat2', 'cat3'인 경우에만 적용
+        if (selectedCatTheme === 'cat1' || selectedCatTheme === 'cat2' || selectedCatTheme === 'cat3') {
+            console.log('테마 적용:', selectedCatTheme);
+            changeBallImage(selectedCatTheme);
+        }
+    }
+
     // 인트로 팝업 자동 표시
     $('#intro-modal').fadeIn(200);
 
