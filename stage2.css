@@ -1,7 +1,14 @@
+@font-face {
+    font-family: 'Ownglyph_ParkDaHyun';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2411-3@1.0/Ownglyph_ParkDaHyun.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
 body {
   margin: 0;
   background-color: #fff8e6;
-  font-family: sans-serif;
+  font-family: 'Ownglyph_ParkDaHyun', sans-serif;
   height: 100vh;
 }
 
@@ -26,7 +33,7 @@ body {
 .stage-title {
   background: #ddd;
   padding: 18px 50px;
-  font-size: 26px;
+  font-size: 30px;
   border-radius: 4px;
   text-align: center;
   margin-bottom: 10px;
@@ -54,7 +61,7 @@ body {
   padding: 18px 0;
   min-width: 160px;
   text-align: center;
-  font-size: 22px;
+  font-size: 26px;
   border-radius: 4px;
 }
 
@@ -96,16 +103,17 @@ body {
   border: none;
   border-radius: 6px;
   padding: 10px 32px;
-  font-size: 20px;
+  font-size: 24px;
   cursor: pointer;
   margin-top: 8px;
+  font-family: 'Ownglyph_ParkDaHyun', sans-serif;
 }
 #skip-btn:hover {
   background: #555;
 }
 
 .time-remaining {
-  font-size: 32px;
+  font-size: 36px;
   color: #222;
   text-align: center;
   margin-top: 8px;
@@ -124,7 +132,7 @@ body {
 }
 
 .clear-title {
-  font-size: 28px;
+  font-size: 32px;
   margin-bottom: 40px;
   text-align: center;
 }
@@ -134,10 +142,11 @@ body {
   border: none;
   border-radius: 6px;
   padding: 16px 40px;
-  font-size: 22px;
+  font-size: 26px;
   margin: 16px 0;
   cursor: pointer;
   min-width: 200px;
+  font-family: 'Ownglyph_ParkDaHyun', sans-serif;
 }
 
 #clear-modal button:hover {
