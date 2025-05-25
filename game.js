@@ -1,158 +1,318 @@
-// Get a reference to the canvas element and its 2D drawing context
-const canvas = document.getElementById('gameCanvas');
+const canvas = document.getElementById('game-canvas');
 const ctx = canvas.getContext('2d');
+let bricks = [];
+const paddleHeight = 12;
+const paddleWidth = 80;
+let paddleX = (canvas.width - paddleWidth) / 2;
+let rightPressed = false;
+let leftPressed = false;
+let ballRadius = 8;
+let x = canvas.width / 2;
+let y = canvas.height - 30;
+let dx = 5;
+let dy = -5;
+let lives = 3;
+let isGameOver = false;
+let isGameClear = false;
+let isRespawning = false;
+let gameStarted = false;
+let score = 0;
 
-// Set the dimensions of our canvas
-canvas.width = 800;
-canvas.height = 600;
-
-// Log to console to confirm script is running
-console.log("Game script loaded and canvas initialized!");
-
-// Owner's Hand (Paddle) properties for Difficulty 4
-const ownerHand = {
-    // Fixed pivot point for the hand's rotation, usually the center of the canvas
-    pivotX: canvas.width / 2,
-    pivotY: canvas.height / 2,
-    // Distance from the pivot to the center of the hand's drawing
-    armLength: 100, // How far the hand extends from the center
-    radius: 40,     // Size of the hand (as a circular paddle)
-    color: 'brown',
-    angle: 0        // Current rotation angle in radians
-};
-
-// Toy (Ball) properties (initial setup, will be spawned later)
-const toy = {
-    x: 50,
-    y: 50,
-    radius: 12,
-    color: 'red',
-    dx: 5,
-    dy: 5
-};
-
-// Breakable items (simplified representation as rectangles)
-let items = [
-    // For now, let's place them around the center.
-    { x: canvas.width / 2 - 120, y: canvas.height / 2 - 40, width: 60, height: 30, color: 'lightblue', type: '유리컵' },
-    { x: canvas.width / 2 - 50, y: canvas.height / 2 - 70, width: 60, height: 30, color: 'lightgreen', type: '그릇' },
-    { x: canvas.width / 2 + 20, y: canvas.height / 2 - 40, width: 60, height: 30, color: 'orange', type: '액자' },
-    { x: canvas.width / 2 - 50, y: canvas.height / 2 + 10, width: 60, height: 30, color: 'purple', type: '택배박스' },
-    { x: canvas.width / 2 - 120, y: canvas.height / 2 + 10, width: 60, height: 30, color: 'lightcoral', type: '시계' },
-    { x: canvas.width / 2 - 50, y: canvas.height / 2 + 50, width: 60, height: 30, color: 'lightgoldenrodyellow', type: '화분' },
-    { x: canvas.width / 2 + 20, y: canvas.height / 2 + 10, width: 60, height: 30, color: 'lightgray', type: '거울' },
-    { x: canvas.width / 2 + 90, y: canvas.height / 2 + 10, width: 60, height: 30, color: 'lightpink', type: '조각상' }
+// 단계별 벽돌 종류 및 내구도 설정
+const levels = [
+    // 난이도 1
+    [
+        { img: 'block_images/glassCup.jpeg', scale: 0.2, hp: 1, name: '유리컵' },
+        { img: 'block_images/plate.jpeg', scale: 0.2, hp: 1, name: '그릇' },
+        { img: 'block_images/frame.jpeg', scale: 0.4, hp: 1, name: '액자' },
+    ],
+    // 난이도 2
+    [
+        { img: 'block_images/glassCup.jpeg', scale: 0.3, hp: 1, name: '유리컵' },
+        { img: 'block_images/plate.jpeg', scale: 0.2, hp: 2, name: '그릇' },
+        { img: 'block_images/frame.jpeg', scale: 0.1, hp: 2, name: '액자' },
+        { img: 'block_images/box.jpeg', scale: 0.2, hp: 3, name: '택배박스' },
+    ],
+    // 난이도 3
+    [
+        { img: 'block_images/glassCup.jpeg', scale: 0.3, hp: 1, name: '유리컵' },
+        { img: 'block_images/plate.jpeg', scale: 0.2, hp: 2, name: '그릇' },
+        { img: 'block_images/frame.jpeg', scale: 0.1, hp: 2, name: '액자' },
+        { img: 'block_images/box.jpeg', scale: 0.2, hp: 3, name: '택배박스' },
+        { img: 'block_images/macbook.jpeg', scale: 0.2, hp: 30, name: '노트북' }, // BOSS
+    ],
 ];
+let currentLevel = 0;
+let brickTypes = levels[currentLevel];
 
-// --- Mouse control for the owner's hand (updated for angle) ---
-canvas.addEventListener('mousemove', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-
-    // Calculate the angle from the pivot point to the mouse position
-    // Math.atan2(y, x) returns the angle in radians between the x-axis and a point (x, y)
-    ownerHand.angle = Math.atan2(mouseY - ownerHand.pivotY, mouseX - ownerHand.pivotX);
-
-    // Update the hand's actual drawing position based on its angle and armLength
-    ownerHand.x = ownerHand.pivotX + ownerHand.armLength * Math.cos(ownerHand.angle);
-    ownerHand.y = ownerHand.pivotY + ownerHand.armLength * Math.sin(ownerHand.angle);
+// 이미지 미리 로드 (모든 레벨의 벽돌 이미지)
+const brickImages = {};
+let imagesToLoad = 0;
+let imagesLoaded = 0;
+levels.flat().forEach((type) => {
+    if (!brickImages[type.img]) {
+        imagesToLoad++;
+        const image = new Image();
+        image.src = type.img;
+        image.onload = () => {
+            imagesLoaded++;
+            if (imagesLoaded === imagesToLoad) {
+                // 모든 이미지가 로드된 후 벽돌만 생성
+                randomPlaceBricks();
+            }
+        };
+        brickImages[type.img] = image;
+    }
 });
+if (imagesToLoad === 0) {
+}
 
+function startGame() {
+    if (gameStarted) return;
+    gameStarted = true;
+    document.addEventListener('keydown', keyDownHandler, false);
+    document.addEventListener('keyup', keyUpHandler, false);
+    document.addEventListener('mousemove', mouseMoveHandler, false);
+    $('#restartBtn').click(restartGame);
+    draw();
+}
+const cellSize = 5; // 셀 한 칸의 크기(px)
+const gridRows = Math.floor(canvas.height / cellSize);
+const gridCols = Math.floor(canvas.width / cellSize);
+const brickAreaRows = Math.floor(gridRows * 0.4); // 위쪽 40%만 사용
+let grid = Array.from({ length: gridRows }, () => Array(gridCols).fill(0));
 
-// --- Game Functions ---
+function canPlaceBrick(row, col, brickW, brickH) {
+    // brickW, brickH는 셀 단위
+    if (row + brickH > brickAreaRows || col + brickW > gridCols) return false;
+    for (let i = 0; i < brickH; i++) {
+        for (let j = 0; j < brickW; j++) {
+            if (grid[row + i][col + j] !== 0) return false;
+        }
+    }
+    return true;
+}
 
-// Draw function: Clears the canvas and draws all game elements
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw the central circle where items are located (for visual reference)
-    ctx.beginPath();
-    ctx.arc(canvas.width / 2, canvas.height / 2, 200, 0, Math.PI * 2); // Example circle radius
-    ctx.strokeStyle = 'gray';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    ctx.closePath();
-
-    // Draw owner's hand (represented as a circle)
-    // Its position is now calculated based on pivot, armLength, and angle
-    ctx.beginPath();
-    ctx.arc(ownerHand.x, ownerHand.y, ownerHand.radius, 0, Math.PI * 2);
-    ctx.fillStyle = ownerHand.color;
-    ctx.fill();
-    ctx.closePath();
-
-    // Draw breakable items (rectangles with text)
-    items.forEach(item => {
-        ctx.fillStyle = item.color;
-        ctx.fillRect(item.x, item.y, item.width, item.height);
-        ctx.fillStyle = 'black';
-        ctx.font = '10px Arial';
-        ctx.fillText(item.type, item.x + 5, item.y + (item.height / 2) + 3);
+function placeBrick(row, col, brickW, brickH, brickObj) {
+    for (let i = 0; i < brickH; i++) {
+        for (let j = 0; j < brickW; j++) {
+            grid[row + i][col + j] = 1;
+        }
+    }
+    // 실제 픽셀 좌표로 변환해서 bricks 배열에 추가
+    bricks.push({
+        x: col * cellSize,
+        y: row * cellSize,
+        w: brickW * cellSize,
+        h: brickH * cellSize,
+        img: brickObj.img,
+        status: 1,
+        hp: brickObj.hp,
+        name: brickObj.name,
     });
+}
 
-    // Draw toy
+// 벽돌 랜덤 배치
+function randomPlaceBricks() {
+    // bricks = [];
+    grid = Array.from({ length: gridRows }, () => Array(gridCols).fill(0));
+    for (let n = 0; n < 1000; n++) {
+        // 충분히 반복
+        let type = brickTypes[Math.floor(Math.random() * brickTypes.length)];
+        let img = brickImages[type.img];
+        let scale = type.scale || 1;
+        let brickW = Math.ceil((img.naturalWidth * scale) / cellSize);
+        let brickH = Math.ceil((img.naturalHeight * scale) / cellSize);
+        let tries = 0;
+        let placed = false;
+        while (tries < 100 && !placed) {
+            let row = Math.floor(Math.random() * (brickAreaRows - brickH));
+            let col = Math.floor(Math.random() * (gridCols - brickW));
+            if (canPlaceBrick(row, col, brickW, brickH)) {
+                // 내구도(hp) 추가
+                bricks.push({
+                    x: col * cellSize,
+                    y: row * cellSize,
+                    w: brickW * cellSize,
+                    h: brickH * cellSize,
+                    img: type.img,
+                    status: 1,
+                    hp: type.hp,
+                    name: type.name,
+                });
+                for (let i = 0; i < brickH; i++) {
+                    for (let j = 0; j < brickW; j++) {
+                        grid[row + i][col + j] = 1;
+                    }
+                }
+                placed = true;
+            }
+            tries++;
+        }
+        // 공간이 부족하면 break
+        if (!placed) break;
+    }
+}
+function drawBricks() {
+    for (let r = 0; r < bricks.length; r++) {
+        let brick = bricks[r];
+        if (brick.status === 1) {
+            let img = brickImages[brick.img];
+            if (img && img.complete && img.naturalWidth && img.naturalHeight) {
+                ctx.drawImage(img, brick.x, brick.y, brick.w, brick.h);
+            } else {
+                ctx.fillStyle = '#888';
+                ctx.fillRect(brick.x, brick.y, brick.w, brick.h);
+            }
+            // 깨지고 있다는 효과: 내구도가 줄어들수록 어두운 레이어를 덮음
+            const maxHp = levels[currentLevel].find((t) => t.img === brick.img).hp;
+            if (brick.hp < maxHp && brick.hp > 0) {
+                ctx.save();
+                // 내구도가 줄수록 더 진하게 (최대 0.6)
+                let alpha = 0.2 + 0.4 * (1 - brick.hp / maxHp);
+                ctx.globalAlpha = alpha;
+                ctx.fillStyle = '#000';
+                ctx.fillRect(brick.x, brick.y, brick.w, brick.h);
+                ctx.restore();
+            }
+        }
+    }
+}
+function drawBall() {
     ctx.beginPath();
-    ctx.arc(toy.x, toy.y, toy.radius, 0, Math.PI * 2);
-    ctx.fillStyle = toy.color;
+    ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+    ctx.fillStyle = '#000';
     ctx.fill();
     ctx.closePath();
 }
-// --- Game Loop (Update function) ---
-function update() {
-    // --- Toy Movement ---
-    toy.x += toy.dx;
-    toy.y += toy.dy;
+function drawPaddle() {
+    ctx.beginPath();
+    ctx.rect(paddleX, canvas.height - paddleHeight - 8, paddleWidth, paddleHeight);
+    ctx.fillStyle = '#3a8dde';
+    ctx.fill();
+    ctx.closePath();
+}
 
-    // --- Bounce off walls ---
-    if (toy.x + toy.radius > canvas.width || toy.x - toy.radius < 0) {
-        toy.dx *= -1;
-    }
-    if (toy.y + toy.radius > canvas.height || toy.y - toy.radius < 0) {
-        toy.dy *= -1;
-    }
-
-    // --- Basic collision detection between hand and toy ---
-    // For now, let's keep the simple bounce for demonstration
-    const distance = Math.sqrt(
-        (toy.x - ownerHand.x)**2 + (toy.y - ownerHand.y)**2
-    );
-
-    if (distance < toy.radius + ownerHand.radius) {
-        // Simple bounce: reverse direction
-        toy.dx *= -1;
-        toy.dy *= -1;
-
-        // Prevent toy from getting stuck inside the paddle
-        const overlap = (toy.radius + ownerHand.radius) - distance;
-        const normalX = (toy.x - ownerHand.x) / distance;
-        const normalY = (toy.y - ownerHand.y) / distance;
-        toy.x += normalX * overlap;
-        toy.y += normalY * overlap;
-    }
-
-    // --- Collision detection between toy and items ---
-    items = items.filter(item => {
-        const closestX = Math.max(item.x, Math.min(toy.x, item.x + item.width));
-        const closestY = Math.max(item.y, Math.min(toy.y, item.y + item.height));
-
-        const distanceX = toy.x - closestX;
-        const distanceY = toy.y - closestY;
-
-        const distanceSquared = (distanceX * distanceX) + (distanceY * distanceY);
-
-        if (distanceSquared < (toy.radius * toy.radius)) {
-            toy.dx *= -1;
-            toy.dy *= -1;
-            return false; // Item was hit, remove it
+function collisionDetection() {
+    for (let r = 0; r < bricks.length; r++) {
+        let brick = bricks[r];
+        if (brick.status === 1) {
+            if (x > brick.x && x < brick.x + brick.w && y > brick.y && y < brick.y + brick.h) {
+                dy = -dy;
+                brick.hp--;
+                if (brick.hp <= 0) {
+                    brick.status = 0;
+                    // 벽돌이 깨질 때, 해당 벽돌의 최초 hp만큼 점수 증가
+                    const maxHp = levels[currentLevel].find((t) => t.img === brick.img).hp;
+                    score += maxHp;
+                    if (isAllBricksCleared()) {
+                        isGameClear = true;
+                        $('#restartBtn').show();
+                    }
+                }
+            }
         }
-        return true; // Item not hit, keep it
-    });
-
-    // --- Call draw and loop ---
+    }
+}
+function isAllBricksCleared() {
+    for (let r = 0; r < bricks.length; r++) {
+        if (bricks[r].status === 1) return false;
+    }
+    return true;
+}
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBricks();
+    if (!isRespawning) {
+        drawBall();
+    }
+    drawPaddle();
+    collisionDetection();
+    if (isGameClear) {
+        ctx.font = '28px Pretendard, Arial';
+        ctx.fillStyle = '#ffd54f';
+        ctx.fillText('축하합니다! 클리어!', canvas.width / 2 - 110, canvas.height / 2);
+        return;
+    }
+    if (isGameOver) {
+        ctx.font = '28px Pretendard, Arial';
+        ctx.fillStyle = '#e57373';
+        ctx.fillText('게임 오버', canvas.width / 2 - 70, canvas.height / 2);
+        return;
+    }
+    if (isRespawning) {
+        requestAnimationFrame(draw);
+        return;
+    }
+    if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
+        dx = -dx;
+    }
+    if (y + dy < ballRadius) {
+        dy = -dy;
+    } else if (y + dy > canvas.height - ballRadius - paddleHeight - 8) {
+        if (x > paddleX && x < paddleX + paddleWidth) {
+            dy = -dy;
+        } else if (y + dy > canvas.height - ballRadius) {
+            lives--;
+            if (!lives) {
+                isGameOver = true;
+                $('#restartBtn').show();
+            } else {
+                isRespawning = true;
+                setTimeout(() => {
+                    x = canvas.width / 2;
+                    y = canvas.height - 30;
+                    dx = 3 * (Math.random() > 0.5 ? 1 : -1);
+                    dy = -3;
+                    paddleX = (canvas.width - paddleWidth) / 2;
+                    isRespawning = false;
+                    draw();
+                }, 3000);
+                requestAnimationFrame(draw);
+                return;
+            }
+        }
+    }
+    x += dx;
+    y += dy;
+    if (rightPressed && paddleX < canvas.width - paddleWidth) {
+        paddleX += 7;
+    } else if (leftPressed && paddleX > 0) {
+        paddleX -= 7;
+    }
+    requestAnimationFrame(draw);
+}
+function keyDownHandler(e) {
+    if (e.key === 'Right' || e.key === 'ArrowRight') {
+        rightPressed = true;
+    } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
+        leftPressed = true;
+    }
+}
+function keyUpHandler(e) {
+    if (e.key === 'Right' || e.key === 'ArrowRight') {
+        rightPressed = false;
+    } else if (e.key === 'Left' || e.key === 'ArrowLeft') {
+        leftPressed = false;
+    }
+}
+function mouseMoveHandler(e) {
+    let relativeX = e.clientX - canvas.getBoundingClientRect().left;
+    if (relativeX > 0 && relativeX < canvas.width) {
+        paddleX = relativeX - paddleWidth / 2;
+    }
+}
+function restartGame() {
+    isGameOver = false;
+    isGameClear = false;
+    x = canvas.width / 2;
+    y = canvas.height - 30;
+    dx = 3 * (Math.random() > 0.5 ? 1 : -1);
+    dy = -3;
+    paddleX = (canvas.width - paddleWidth) / 2;
+    currentLevel = 0;
+    brickTypes = levels[currentLevel];
+    randomPlaceBricks();
+    $('#restartBtn').hide();
     draw();
-    requestAnimationFrame(update); // This line is likely game.js:117
-} // This is the closing brace for the update function. Make sure it's here!
-
-// Start the game loop
-update();
+}
