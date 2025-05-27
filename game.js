@@ -36,7 +36,7 @@ let currentBallImage = ballImages.ball1; // 기본값으로 ball1 설정
 const paddleImages = {
     paddle1: new Image(),
     paddle2: new Image(),
-    paddle3: new Image()
+    paddle3: new Image(),
 };
 
 // 이미지 로드 에러 처리
@@ -59,7 +59,7 @@ let currentPaddleImage = paddleImages.paddle1; // 기본값으로 paddle1 설정
 // 테마 선택에 따른 공과 paddle 이미지 변경 함수
 function changeBallImage(theme) {
     console.log('changeBallImage 호출됨, 테마:', theme);
-    switch(theme) {
+    switch (theme) {
         case 'cat1':
             console.log('ball1, paddle1 이미지로 변경');
             currentBallImage = ballImages.ball1;
@@ -110,14 +110,10 @@ let imagesToLoad = 0;
 let imagesLoaded = 0;
 
 // 깨지는 이미지도 미리 로드
-const breakImages = [
-    'block_images/glassCup_2.PNG',
-    'block_images/plate1_2.PNG',
-    'block_images/frame2_2.PNG'
-];
+const breakImages = ['block_images/glassCup_2.PNG', 'block_images/plate1_2.PNG', 'block_images/frame2_2.PNG'];
 
 // 기존 이미지와 깨지는 이미지 모두 로드
-[...levels.flat().map(type => type.img), ...breakImages].forEach((imgPath) => {
+[...levels.flat().map((type) => type.img), ...breakImages].forEach((imgPath) => {
     if (!brickImages[imgPath]) {
         imagesToLoad++;
         const image = new Image();
@@ -142,6 +138,7 @@ function startGame() {
     draw();
 }
 
+//캔버스를 cell단위로 나눔
 const cellSize = 5;
 const gridRows = Math.floor(canvas.height / cellSize);
 const gridCols = Math.floor(canvas.width / cellSize);
@@ -261,12 +258,17 @@ function drawPaddle() {
     }
 }
 
+function showClearModal() {
+    $('#clear-modal').fadeIn(200);
+}
+
 function collisionDetection() {
     for (let brick of bricks) {
         if (brick.status === 1) {
             if (x > brick.x && x < brick.x + brick.w && y > brick.y && y < brick.y + brick.h) {
                 dy = -dy;
                 brick.hp--;
+
                 if (brick.hp <= 0) {
                     // 벽돌이 깨질 때 애니메이션 시작
                     brick.status = 2; // 2는 깨지는 중 상태
@@ -283,18 +285,21 @@ function collisionDetection() {
                     setTimeout(() => {
                         brick.status = 0;
                     }, 300);
-                    
+
                     // 벽돌이 깨질 때, 해당 벽돌의 최초 hp만큼 점수 증가
                     const maxHp = levels[currentLevel].find((t) => t.img === brick.img).hp;
                     score += maxHp;
                     $('#score-box').text(score);
-                    if (isAllBricksCleared()) {
-                        isGameClear = true;
-                        cancelAnimationFrame(animationId);
-                        animationId = null;
-                        $('#restartBtn').show();
-                        $('#clear-modal').fadeIn(200);
-                    }
+                }
+
+                if (isAllBricksCleared()) {
+                    console.log('벽돌 끝');
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                    // $('#restartBtn').show();
+                    // $('#clear-modal').fadeIn(200);
+                    showClearModal();
+                    isGameClear = true;
                 }
             }
         }
@@ -302,7 +307,8 @@ function collisionDetection() {
 }
 
 function isAllBricksCleared() {
-    return bricks.every((brick) => brick.status === 0);
+    //모든 brick의 hp가 0이라면 true 반환
+    return bricks.every((brick) => brick.hp === 0);
 }
 
 function draw() {
@@ -316,7 +322,6 @@ function draw() {
     if (!isRespawning) drawBall();
     drawPaddle();
     collisionDetection();
-
 
     if (isRespawning) return;
 
@@ -375,6 +380,25 @@ function mouseMoveHandler(e) {
     if (relativeX > 0 && relativeX < canvas.width) paddleX = relativeX - paddleWidth / 2;
 }
 
+//테스트용 함수
+function createTestBrick() {
+    // 임의의 벽돌 속성 설정
+    console.log('테스트');
+    const testBrick = {
+        img: 'block_images/glassCup_1.PNG', // 사용할 이미지
+        scale: 0.2, // 크기 조정 비율
+        hp: 1, // 내구도
+        name: '테스트 벽돌', // 벽돌 이름
+    };
+
+    // 벽돌을 배치할 위치 설정
+    const row = 0; // 첫 번째 행
+    const col = 0; // 첫 번째 열
+
+    // 벽돌을 배치
+    placeBrick(row, col, 1, 1, testBrick); // 1x1 크기의 벽돌 추가
+}
+
 function restartGame() {
     isGameOver = false;
     isGameClear = false;
@@ -386,6 +410,7 @@ function restartGame() {
     paddleX = (canvas.width - paddleWidth) / 2;
     currentLevel = 0;
     brickTypes = levels[currentLevel];
+    bricks = [];
     randomPlaceBricks();
     $('#restartBtn').hide();
     score = 0;
