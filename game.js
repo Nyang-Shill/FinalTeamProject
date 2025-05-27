@@ -302,6 +302,7 @@ function collisionDetection() {
                         showClearModal(); // 모달 띄우기
                         cancelAnimationFrame(animationId); // 애니메이션 종료
                         animationId = null;
+                        clearInterval(timerInterval);
                     }, 1500);
                 }
             }
@@ -382,14 +383,13 @@ function mouseMoveHandler(e) {
     let relativeX = e.clientX - canvas.getBoundingClientRect().left;
     if (relativeX > 0 && relativeX < canvas.width) paddleX = relativeX - paddleWidth / 2;
 
-    // 마우스가 닿아도 벽돌이 깨짐, 시작
+    /***************************마우스가 닿아도 벽돌이 깨짐, 시작*******************************/
     let relativeY = e.clientY - canvas.getBoundingClientRect().top;
 
     if (relativeX > 0 && relativeX < canvas.width) {
         paddleX = relativeX - paddleWidth / 2;
     }
 
-    // 마우스로 벽돌 깨기
     for (let brick of bricks) {
         if (brick.status === 1) {
             if (
@@ -429,7 +429,7 @@ function mouseMoveHandler(e) {
             }
         }
     }
-    //끝
+    /***************************마우스가 닿아도 벽돌이 깨짐, 끝*******************************/
 }
 
 //테스트용 함수
