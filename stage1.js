@@ -1,3 +1,5 @@
+let timerInterval = null;
+
 $(document).ready(function () {
     // 캔버스 안내 텍스트
     // const canvas = document.getElementById('game-canvas');
@@ -45,7 +47,7 @@ $(document).ready(function () {
 
     // 제한시간 타이머
     let timeLeft = 30;
-    let timerInterval = null;
+    // let timerInterval = null;
 
     function startGameTimer() {
         $('#time-remaining').text(timeLeft);
