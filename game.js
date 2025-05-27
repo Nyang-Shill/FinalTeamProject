@@ -384,51 +384,51 @@ function mouseMoveHandler(e) {
     if (relativeX > 0 && relativeX < canvas.width) paddleX = relativeX - paddleWidth / 2;
 
     /***************************마우스가 닿아도 벽돌이 깨짐, 시작*******************************/
-    let relativeY = e.clientY - canvas.getBoundingClientRect().top;
+    // let relativeY = e.clientY - canvas.getBoundingClientRect().top;
 
-    if (relativeX > 0 && relativeX < canvas.width) {
-        paddleX = relativeX - paddleWidth / 2;
-    }
+    // if (relativeX > 0 && relativeX < canvas.width) {
+    //     paddleX = relativeX - paddleWidth / 2;
+    // }
 
-    for (let brick of bricks) {
-        if (brick.status === 1) {
-            if (
-                relativeX >= brick.x &&
-                relativeX <= brick.x + brick.w &&
-                relativeY >= brick.y &&
-                relativeY <= brick.y + brick.h
-            ) {
-                brick.hp--;
-                if (brick.hp <= 0) {
-                    brick.status = 2;
-                    brick.breakStartTime = Date.now();
-                    if (brick.img.includes('glassCup_1')) {
-                        brick.breakImg = 'block_images/glassCup_2.PNG';
-                    } else if (brick.img.includes('plate1_1')) {
-                        brick.breakImg = 'block_images/plate1_2.PNG';
-                    } else if (brick.img.includes('frame2_1')) {
-                        brick.breakImg = 'block_images/frame2_2.PNG';
-                    }
-                    setTimeout(() => {
-                        brick.status = 0;
-                    }, 300);
+    // for (let brick of bricks) {
+    //     if (brick.status === 1) {
+    //         if (
+    //             relativeX >= brick.x &&
+    //             relativeX <= brick.x + brick.w &&
+    //             relativeY >= brick.y &&
+    //             relativeY <= brick.y + brick.h
+    //         ) {
+    //             brick.hp--;
+    //             if (brick.hp <= 0) {
+    //                 brick.status = 2;
+    //                 brick.breakStartTime = Date.now();
+    //                 if (brick.img.includes('glassCup_1')) {
+    //                     brick.breakImg = 'block_images/glassCup_2.PNG';
+    //                 } else if (brick.img.includes('plate1_1')) {
+    //                     brick.breakImg = 'block_images/plate1_2.PNG';
+    //                 } else if (brick.img.includes('frame2_1')) {
+    //                     brick.breakImg = 'block_images/frame2_2.PNG';
+    //                 }
+    //                 setTimeout(() => {
+    //                     brick.status = 0;
+    //                 }, 300);
 
-                    const maxHp = levels[currentLevel].find((t) => t.img === brick.img).hp;
-                    score += maxHp;
-                    $('#score-box').text(score);
+    //                 const maxHp = levels[currentLevel].find((t) => t.img === brick.img).hp;
+    //                 score += maxHp;
+    //                 $('#score-box').text(score);
 
-                    if (isAllBricksCleared()) {
-                        setTimeout(() => {
-                            isGameClear = true;
-                            showClearModal();
-                            cancelAnimationFrame(animationId);
-                            animationId = null;
-                        }, 3000);
-                    }
-                }
-            }
-        }
-    }
+    //                 if (isAllBricksCleared()) {
+    //                     setTimeout(() => {
+    //                         isGameClear = true;
+    //                         showClearModal();
+    //                         cancelAnimationFrame(animationId);
+    //                         animationId = null;
+    //                     }, 3000);
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
     /***************************마우스가 닿아도 벽돌이 깨짐, 끝*******************************/
 }
 
