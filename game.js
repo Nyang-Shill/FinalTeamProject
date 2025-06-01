@@ -19,6 +19,8 @@ let isRespawning = false;
 let gameStarted = false;
 let score = 0;
 let animationId = null;
+let isPowerUp = false;
+let powerUpTimeout = null;
 
 // 공 이미지 관리
 const ballImages = {
@@ -190,6 +192,28 @@ function placeBrick(row, col, brickW, brickH, brickObj) {
 
 function randomPlaceBricks() {
     grid = Array.from({ length: gridRows }, () => Array(gridCols).fill(0));
+    
+    // 각 벽돌 종류별로 최소 1개씩 먼저 배치
+    for (let type of brickTypes) {
+        let img = brickImages[type.img];
+        let scale = type.scale || 1;
+        let brickW = Math.ceil((img.naturalWidth * scale) / cellSize);
+        let brickH = Math.ceil((img.naturalHeight * scale) / cellSize);
+        let tries = 0;
+        let placed = false;
+        
+        while (tries < 100 && !placed) {
+            let row = Math.floor(Math.random() * (brickAreaRows - brickH));
+            let col = Math.floor(Math.random() * (gridCols - brickW));
+            if (canPlaceBrick(row, col, brickW, brickH)) {
+                placeBrick(row, col, brickW, brickH, type);
+                placed = true;
+            }
+            tries++;
+        }
+    }
+
+    // 나머지 벽돌 랜덤 배치
     for (let n = 0; n < 1000; n++) {
         let type = brickTypes[Math.floor(Math.random() * brickTypes.length)];
         let img = brickImages[type.img];
@@ -198,6 +222,7 @@ function randomPlaceBricks() {
         let brickH = Math.ceil((img.naturalHeight * scale) / cellSize);
         let tries = 0;
         let placed = false;
+        
         while (tries < 100 && !placed) {
             let row = Math.floor(Math.random() * (brickAreaRows - brickH));
             let col = Math.floor(Math.random() * (gridCols - brickW));
@@ -274,7 +299,13 @@ function collisionDetection() {
         if (brick.status === 1) {
             if (x > brick.x && x < brick.x + brick.w && y > brick.y && y < brick.y + brick.h) {
                 dy = -dy;
-                brick.hp--;
+                
+                // 파워업 상태일 때 hp를 2 감소, 아닐 때는 1 감소
+                if (isPowerUp) {
+                    brick.hp -= 2;
+                } else {
+                    brick.hp--;
+                }
 
                 // stage1의 벽돌 처리
                 if (brick.img.includes('glassCup_1') && currentLevel === 0) {
@@ -344,11 +375,18 @@ function collisionDetection() {
                         brick.img = 'block_images/box1_3.PNG';
                     } else if (brick.hp <= 0) {
                         brick.breakImg = 'block_images/chur.PNG';
-                        brick.originalW = brick.w;
-                        brick.originalH = brick.h;
-                        brick.w = brick.w * 1.5;
-                        brick.h = brick.h * 1.5;
                         brick.status = 2;
+                        // chur를 얻으면 파워업 활성화
+                        isPowerUp = true;
+                        // 이전 파워업 타이머가 있다면 취소
+                        if (powerUpTimeout) {
+                            clearTimeout(powerUpTimeout);
+                        }
+                        // 5초 후 파워업 비활성화
+                        powerUpTimeout = setTimeout(() => {
+                            isPowerUp = false;
+                            powerUpTimeout = null;
+                        }, 5000);
                         setTimeout(() => { brick.status = 0; }, 500);
                     }
                 } else if (brick.img === 'block_images/box1_2.PNG') {
@@ -356,21 +394,35 @@ function collisionDetection() {
                         brick.img = 'block_images/box1_3.PNG';
                     } else if (brick.hp <= 0) {
                         brick.breakImg = 'block_images/chur.PNG';
-                        brick.originalW = brick.w;
-                        brick.originalH = brick.h;
-                        brick.w = brick.w * 1.5;
-                        brick.h = brick.h * 1.5;
                         brick.status = 2;
+                        // chur를 얻으면 파워업 활성화
+                        isPowerUp = true;
+                        // 이전 파워업 타이머가 있다면 취소
+                        if (powerUpTimeout) {
+                            clearTimeout(powerUpTimeout);
+                        }
+                        // 5초 후 파워업 비활성화
+                        powerUpTimeout = setTimeout(() => {
+                            isPowerUp = false;
+                            powerUpTimeout = null;
+                        }, 5000);
                         setTimeout(() => { brick.status = 0; }, 500);
                     }
                 } else if (brick.img === 'block_images/box1_3.PNG') {
                     if (brick.hp <= 0) {
                         brick.breakImg = 'block_images/chur.PNG';
-                        brick.originalW = brick.w;
-                        brick.originalH = brick.h;
-                        brick.w = brick.w * 1.5;
-                        brick.h = brick.h * 1.5;
                         brick.status = 2;
+                        // chur를 얻으면 파워업 활성화
+                        isPowerUp = true;
+                        // 이전 파워업 타이머가 있다면 취소
+                        if (powerUpTimeout) {
+                            clearTimeout(powerUpTimeout);
+                        }
+                        // 5초 후 파워업 비활성화
+                        powerUpTimeout = setTimeout(() => {
+                            isPowerUp = false;
+                            powerUpTimeout = null;
+                        }, 5000);
                         setTimeout(() => { brick.status = 0; }, 500);
                     }
                 }
@@ -423,6 +475,14 @@ function draw() {
     if (isGameClear || isGameOver) return;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // 파워업 상태일 때 캔버스 테두리 그리기
+    if (isPowerUp) {
+        ctx.strokeStyle = '#FFD700';  // 노란색
+        ctx.lineWidth = 5;
+        ctx.strokeRect(0, 0, canvas.width, canvas.height);
+    }
+    
     drawBricks();
     if (!isRespawning) drawBall();
     drawPaddle();
@@ -554,6 +614,11 @@ function createTestBrick() {
 function restartGame() {
     isGameOver = false;
     isGameClear = false;
+    isPowerUp = false;
+    if (powerUpTimeout) {
+        clearTimeout(powerUpTimeout);
+        powerUpTimeout = null;
+    }
     x = canvas.width / 2;
     y = canvas.height - paddleHeight - 15;
     dx = BASE_SPEED_X * (Math.random() > 0.5 ? 1 : -1);
