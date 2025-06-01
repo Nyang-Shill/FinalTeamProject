@@ -13,7 +13,6 @@ let x = canvas.width / 2;
 let y = canvas.height - 100;
 let dx = BASE_SPEED_X;
 let dy = BASE_SPEED_Y;
-let lives = 3;
 let isGameOver = false;
 let isGameClear = false;
 let isRespawning = false;
@@ -89,16 +88,16 @@ const levels = [
         { img: 'block_images/frame2_1.PNG', scale: 0.4, hp: 1, name: '액자' },
     ],
     [
-        { img: 'block_images/glassCup_1.PNG', scale: 0.3, hp: 1, name: '유리컵' },
-        { img: 'block_images/plate1_1.PNG', scale: 0.2, hp: 2, name: '그릇' },
-        { img: 'block_images/frame1_1.PNG', scale: 0.1, hp: 2, name: '액자' },
-        { img: 'block_images/box1_1.PNG', scale: 0.2, hp: 3, name: '택배박스' },
+        { img: 'block_images/glassCup_1.PNG', scale: 0.2, hp: 1, name: '유리컵' },
+        { img: 'block_images/plate2_1.PNG', scale: 0.2, hp: 2, name: '그릇' },
+        { img: 'block_images/frame1_1.PNG', scale: 0.4, hp: 2, name: '액자' },
+        { img: 'block_images/box1_1.PNG', scale: 0.4, hp: 3, name: '택배박스' },
     ],
     [
-        { img: 'block_images/glassCup_1.PNG', scale: 0.3, hp: 1, name: '유리컵' },
-        { img: 'block_images/plate1_1.PNG', scale: 0.2, hp: 2, name: '그릇' },
-        { img: 'block_images/frame1_1.PNG', scale: 0.1, hp: 2, name: '액자' },
-        { img: 'block_images/box1_1.PNG', scale: 0.2, hp: 3, name: '택배박스' },
+        { img: 'block_images/glassCup_1.PNG', scale: 0.2, hp: 1, name: '유리컵' },
+        { img: 'block_images/plate2_1.PNG', scale: 0.2, hp: 2, name: '그릇' },
+        { img: 'block_images/frame1_1.PNG', scale: 0.4, hp: 2, name: '액자' },
+        { img: 'block_images/box1_1.PNG', scale: 0.4, hp: 3, name: '택배박스' },
         { img: 'block_images/notebook_1.PNG', scale: 0.2, hp: 30, name: '노트북' },
     ],
 ];
@@ -110,7 +109,20 @@ let imagesToLoad = 0;
 let imagesLoaded = 0;
 
 // 깨지는 이미지도 미리 로드
-const breakImages = ['block_images/glassCup_2.PNG', 'block_images/plate1_2.PNG', 'block_images/frame2_2.PNG'];
+const breakImages = [
+    // stage1 이미지
+    'block_images/glassCup_2.PNG',
+    'block_images/plate1_2.PNG',
+    'block_images/frame2_2.PNG',
+    // stage2 이미지
+    'block_images/plate2_2.PNG',
+    'block_images/plate2_3.PNG',
+    'block_images/frame1_2.PNG',
+    'block_images/frame1_3.PNG',
+    'block_images/box1_2.PNG',
+    'block_images/box1_3.PNG',
+    'block_images/chur.PNG'
+];
 
 // 기존 이미지와 깨지는 이미지 모두 로드
 [...levels.flat().map((type) => type.img), ...breakImages].forEach((imgPath) => {
@@ -209,15 +221,6 @@ function drawBricks() {
                 ctx.fillStyle = '#888';
                 ctx.fillRect(brick.x, brick.y, brick.w, brick.h);
             }
-            const maxHp = levels[currentLevel].find((t) => t.img === brick.img).hp;
-            if (brick.hp < maxHp && brick.hp > 0) {
-                ctx.save();
-                let alpha = 0.2 + 0.4 * (1 - brick.hp / maxHp);
-                ctx.globalAlpha = alpha;
-                ctx.fillStyle = '#000';
-                ctx.fillRect(brick.x, brick.y, brick.w, brick.h);
-                ctx.restore();
-            }
         } else if (brick.status === 2) {
             // 깨지는 중인 상태일 때
             let breakImg = brickImages[brick.breakImg];
@@ -262,6 +265,7 @@ function drawPaddle() {
 }
 
 function showClearModal() {
+    $('.clear-score-btn').text(`점수: ${score}`);
     $('#clear-modal').fadeIn(200);
 }
 
@@ -272,25 +276,114 @@ function collisionDetection() {
                 dy = -dy;
                 brick.hp--;
 
-                if (brick.hp <= 0) {
-                    // 벽돌이 깨질 때 애니메이션 시작
-                    brick.status = 2; // 2는 깨지는 중 상태
-                    brick.breakStartTime = Date.now();
-                    // 깨지는 이미지로 변경
-                    if (brick.img.includes('glassCup_1')) {
+                // stage1의 벽돌 처리
+                if (brick.img.includes('glassCup_1') && currentLevel === 0) {
+                    if (brick.hp <= 0) {
                         brick.breakImg = 'block_images/glassCup_2.PNG';
-                    } else if (brick.img.includes('plate1_1')) {
-                        brick.breakImg = 'block_images/plate1_2.PNG';
-                    } else if (brick.img.includes('frame2_1')) {
-                        brick.breakImg = 'block_images/frame2_2.PNG';
+                        brick.status = 2;
+                        setTimeout(() => { brick.status = 0; }, 300);
                     }
-                    // 0.5초 후에 완전히 사라지도록 설정
-                    setTimeout(() => {
-                        brick.status = 0;
-                    }, 300);
+                } else if (brick.img.includes('plate1_1')) {
+                    if (brick.hp <= 0) {
+                        brick.breakImg = 'block_images/plate1_2.PNG';
+                        brick.status = 2;
+                        setTimeout(() => { brick.status = 0; }, 300);
+                    }
+                } else if (brick.img.includes('frame2_1')) {
+                    if (brick.hp <= 0) {
+                        brick.breakImg = 'block_images/frame2_2.PNG';
+                        brick.status = 2;
+                        setTimeout(() => { brick.status = 0; }, 300);
+                    }
+                }
+                // stage2의 벽돌 처리 (명확한 분기)
+                else if (brick.img.includes('glassCup_1') && currentLevel === 1) {
+                    if (brick.hp <= 0) {
+                        brick.breakImg = 'block_images/glassCup_2.PNG';
+                        brick.status = 2;
+                        setTimeout(() => { brick.status = 0; }, 300);
+                    }
+                }
+                // plate2 계열
+                else if (brick.img === 'block_images/plate2_1.PNG') {
+                    if (brick.hp === 1) {
+                        brick.img = 'block_images/plate2_2.PNG';
+                    } else if (brick.hp <= 0) {
+                        brick.breakImg = 'block_images/plate2_3.PNG';
+                        brick.status = 2;
+                        setTimeout(() => { brick.status = 0; }, 300);
+                    }
+                } else if (brick.img === 'block_images/plate2_2.PNG') {
+                    if (brick.hp <= 0) {
+                        brick.breakImg = 'block_images/plate2_3.PNG';
+                        brick.status = 2;
+                        setTimeout(() => { brick.status = 0; }, 300);
+                    }
+                }
+                // frame1 계열
+                else if (brick.img === 'block_images/frame1_1.PNG') {
+                    if (brick.hp === 1) {
+                        brick.img = 'block_images/frame1_2.PNG';
+                    } else if (brick.hp <= 0) {
+                        brick.breakImg = 'block_images/frame1_3.PNG';
+                        brick.status = 2;
+                        setTimeout(() => { brick.status = 0; }, 300);
+                    }
+                } else if (brick.img === 'block_images/frame1_2.PNG') {
+                    if (brick.hp <= 0) {
+                        brick.breakImg = 'block_images/frame1_3.PNG';
+                        brick.status = 2;
+                        setTimeout(() => { brick.status = 0; }, 300);
+                    }
+                }
+                // box1 계열
+                else if (brick.img === 'block_images/box1_1.PNG') {
+                    if (brick.hp === 2) {
+                        brick.img = 'block_images/box1_2.PNG';
+                    } else if (brick.hp === 1) {
+                        brick.img = 'block_images/box1_3.PNG';
+                    } else if (brick.hp <= 0) {
+                        brick.breakImg = 'block_images/chur.PNG';
+                        brick.originalW = brick.w;
+                        brick.originalH = brick.h;
+                        brick.w = brick.w * 1.5;
+                        brick.h = brick.h * 1.5;
+                        brick.status = 2;
+                        setTimeout(() => { brick.status = 0; }, 500);
+                    }
+                } else if (brick.img === 'block_images/box1_2.PNG') {
+                    if (brick.hp === 1) {
+                        brick.img = 'block_images/box1_3.PNG';
+                    } else if (brick.hp <= 0) {
+                        brick.breakImg = 'block_images/chur.PNG';
+                        brick.originalW = brick.w;
+                        brick.originalH = brick.h;
+                        brick.w = brick.w * 1.5;
+                        brick.h = brick.h * 1.5;
+                        brick.status = 2;
+                        setTimeout(() => { brick.status = 0; }, 500);
+                    }
+                } else if (brick.img === 'block_images/box1_3.PNG') {
+                    if (brick.hp <= 0) {
+                        brick.breakImg = 'block_images/chur.PNG';
+                        brick.originalW = brick.w;
+                        brick.originalH = brick.h;
+                        brick.w = brick.w * 1.5;
+                        brick.h = brick.h * 1.5;
+                        brick.status = 2;
+                        setTimeout(() => { brick.status = 0; }, 500);
+                    }
+                }
 
-                    // 벽돌이 깨질 때, 해당 벽돌의 최초 hp만큼 점수 증가
-                    const maxHp = levels[currentLevel].find((t) => t.img === brick.img).hp;
+                // 벽돌이 깨질 때, 해당 벽돌의 최초 hp만큼 점수 증가
+                if (brick.hp <= 0) {
+                    let maxHp = 1;
+                    if (brick.img.startsWith('block_images/box1_') || brick.breakImg === 'block_images/chur.PNG') {
+                        maxHp = 3;
+                    } else {
+                        const found = levels[currentLevel].find((t) => t.img === brick.img);
+                        if (found) maxHp = found.hp;
+                    }
                     score += maxHp;
                     $('#score-box').text(score);
                 }
@@ -298,9 +391,9 @@ function collisionDetection() {
                 if (isAllBricksCleared()) {
                     setTimeout(() => {
                         console.log('1.5초간 기다립니다.');
-                        isGameClear = true; // <-- 3초 후에 클리어 처리
-                        showClearModal(); // 모달 띄우기
-                        cancelAnimationFrame(animationId); // 애니메이션 종료
+                        isGameClear = true;
+                        showClearModal();
+                        cancelAnimationFrame(animationId);
                         animationId = null;
                         clearInterval(timerInterval);
                     }, 1500);
@@ -337,25 +430,16 @@ function draw() {
         if (x > paddleX && x < paddleX + paddleWidth) {
             dy = -dy;
         } else if (y + dy > canvas.height - ballRadius) {
-            lives--;
-            if (!lives) {
-                isGameOver = true;
-                cancelAnimationFrame(animationId);
-                animationId = null;
-                $('#restartBtn').show();
-                return;
-            } else {
-                isRespawning = true;
-                setTimeout(() => {
-                    x = canvas.width / 2;
-                    y = canvas.height - paddleHeight - 15;
-                    dx = BASE_SPEED_X * (Math.random() > 0.5 ? 1 : -1);
-                    dy = BASE_SPEED_Y;
-                    paddleX = (canvas.width - paddleWidth) / 2;
-                    isRespawning = false;
-                }, 3000);
-                return;
-            }
+            isRespawning = true;
+            setTimeout(() => {
+                x = canvas.width / 2;
+                y = canvas.height - paddleHeight - 15;
+                dx = BASE_SPEED_X * (Math.random() > 0.5 ? 1 : -1);
+                dy = BASE_SPEED_Y;
+                paddleX = (canvas.width - paddleWidth) / 2;
+                isRespawning = false;
+            }, 3000);
+            return;
         }
     }
 
@@ -464,14 +548,12 @@ function restartGame() {
     isGameClear = false;
     x = canvas.width / 2;
     y = canvas.height - paddleHeight - 15;
-
     dx = BASE_SPEED_X * (Math.random() > 0.5 ? 1 : -1);
     dy = BASE_SPEED_Y;
     paddleX = (canvas.width - paddleWidth) / 2;
     currentLevel = 0;
     brickTypes = levels[currentLevel];
     bricks = [];
-    // createTestBrick();
     randomPlaceBricks();
     $('#restartBtn').hide();
     score = 0;

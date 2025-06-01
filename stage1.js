@@ -33,10 +33,6 @@ $(document).ready(function () {
     }, 5000);
 
     // SKIP 버튼 클릭 시 즉시 닫힘
-    // $('#skip-btn').click(function () {
-    //     $('#intro-modal').fadeOut(200, startGameTimer);
-    //     clearTimeout(introTimeout);
-    // });
     $('#skip-btn').click(function () {
         $('#intro-modal').fadeOut(200, function () {
             if (typeof startGame === 'function') startGame(); // ✅ 추가
@@ -47,7 +43,6 @@ $(document).ready(function () {
 
     // 제한시간 타이머
     let timeLeft = 30;
-    // let timerInterval = null;
 
     function startGameTimer() {
         $('#time-remaining').text(timeLeft);
@@ -56,34 +51,19 @@ $(document).ready(function () {
             $('#time-remaining').text(timeLeft);
             if (timeLeft <= 0) {
                 clearInterval(timerInterval);
-                showClearModal();
                 isGameClear = true;
+                cancelAnimationFrame(animationId);
+                animationId = null;
+                showClearModal();
             }
         }, 1000);
     }
 
-    // 스테이지 클리어 팝업 표시
-    function showClearModal() {
-        $('#clear-modal').fadeIn(200);
-    }
-
-    // 팝업 버튼 동작 (예시)
+    // 팝업 버튼 동작
     $('.clear-next-btn').click(function () {
         window.location.href = 'stage2.html';
     });
     $('.clear-home-btn').click(function () {
         window.location.href = 'home.html';
     });
-    // 점수 버튼은 필요에 따라 동작 추가
-
-    // let gameStarted = false;
-    // function startGame() {
-    //     if (gameStarted) return;
-    //     gameStarted = true;
-    //     document.addEventListener('keydown', keyDownHandler, false);
-    //     document.addEventListener('keyup', keyUpHandler, false);
-    //     document.addEventListener('mousemove', mouseMoveHandler, false);
-    //     $('#restartBtn').click(restartGame);
-    //     draw();
-    // }
 });

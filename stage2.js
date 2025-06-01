@@ -56,6 +56,7 @@ $(document).ready(function () {
 
     // 스테이지 클리어 팝업 표시
     function showClearModal() {
+        $('.clear-score-btn').text(`점수: ${score}`);
         $('#clear-modal').fadeIn(200);
     }
 
@@ -81,11 +82,11 @@ $(document).ready(function () {
     }
 
     function setLevelAndStart() {
-        if (typeof currentLevel !== 'undefined') {
-            currentLevel = getStageLevelFromFilename();
-            brickTypes = levels[currentLevel];
-            randomPlaceBricks();
-        }
+        currentLevel = getStageLevelFromFilename();
+        brickTypes = levels[currentLevel];
+        bricks = []; // 벽돌 배열 초기화
+        grid = Array.from({ length: gridRows }, () => Array(gridCols).fill(0)); // 그리드 초기화
+        randomPlaceBricks();
         if (typeof startGame === 'function') startGame();
     }
 });
