@@ -378,9 +378,17 @@ function collisionDetection() {
                 // 벽돌이 깨질 때, 해당 벽돌의 최초 hp만큼 점수 증가
                 if (brick.hp <= 0) {
                     let maxHp = 1;
-                    if (brick.img.startsWith('block_images/box1_') || brick.breakImg === 'block_images/chur.PNG') {
-                        maxHp = 3;
-                    } else {
+                    if (currentLevel === 1) {  // stage2일 때
+                        if (brick.img.includes('glassCup_1')) {
+                            maxHp = 1;  // 유리컵: 1점
+                        } else if (brick.img.includes('plate2_')) {
+                            maxHp = 2;  // 그릇: 2점
+                        } else if (brick.img.includes('frame1_')) {
+                            maxHp = 2;  // 액자: 2점
+                        } else if (brick.img.includes('box1_')) {
+                            maxHp = 3;  // 택배박스: 3점
+                        }
+                    } else {  // stage1일 때는 기존 로직 유지
                         const found = levels[currentLevel].find((t) => t.img === brick.img);
                         if (found) maxHp = found.hp;
                     }
