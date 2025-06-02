@@ -100,7 +100,7 @@ const levels = [
         { img: 'block_images/plate2_1.PNG', scale: 0.2, hp: 2, name: '그릇' },
         { img: 'block_images/frame1_1.PNG', scale: 0.4, hp: 2, name: '액자' },
         { img: 'block_images/box1_1.PNG', scale: 0.4, hp: 3, name: '택배박스' },
-        { img: 'block_images/notebook1.PNG', scale: 0.2, hp: 30, name: '노트북' },
+        { img: 'block_images/notebook1.PNG', scale: 0.8, hp: 30, name: '노트북' },
     ],
 ];
 let currentLevel = 0;
@@ -220,29 +220,26 @@ function placeBrick(row, col, brickW, brickH, brickObj) {
 function randomPlaceBricks() {
     grid = Array.from({ length: gridRows }, () => Array(gridCols).fill(0));
 
-    // 각 벽돌 종류별로 최소 1개씩 먼저 배치
-    for (let type of brickTypes) {
-        let img = brickImages[type.img];
-        let scale = type.scale || 1;
-        let brickW = Math.ceil((img.naturalWidth * scale) / cellSize);
-        let brickH = Math.ceil((img.naturalHeight * scale) / cellSize);
-        let tries = 0;
-        let placed = false;
+    // ✅ notebook1을 가장 먼저 중앙 상단에 고정 배치
+    const notebook = brickTypes.find((type) => type.img.includes('notebook1'));
+    if (notebook) {
+        const img = brickImages[notebook.img];
+        const scale = notebook.scale || 1;
+        const brickW = Math.ceil((img.naturalWidth * scale) / cellSize);
+        const brickH = Math.ceil((img.naturalHeight * scale) / cellSize);
 
-        while (tries < 100 && !placed) {
-            let row = Math.floor(Math.random() * (brickAreaRows - brickH));
-            let col = Math.floor(Math.random() * (gridCols - brickW));
-            if (canPlaceBrick(row, col, brickW, brickH)) {
-                placeBrick(row, col, brickW, brickH, type);
-                placed = true;
-            }
-            tries++;
-        }
+        const col = Math.floor((gridCols - brickW) / 2); // 중앙 열
+        const row = 1; // 위쪽에서 두 번째 줄 (0은 너무 경계일 수 있음)
+
+        placeBrick(row, col, brickW, brickH, notebook);
     }
 
-    // 나머지 벽돌 랜덤 배치
+    // ✅ notebook을 제외한 나머지 타입 필터링
+    const nonNotebookTypes = brickTypes.filter((type) => !type.img.includes('notebook'));
+
+    // ✅ 나머지 벽돌 랜덤 배치
     for (let n = 0; n < 1000; n++) {
-        let type = brickTypes[Math.floor(Math.random() * brickTypes.length)];
+        let type = nonNotebookTypes[Math.floor(Math.random() * nonNotebookTypes.length)];
         let img = brickImages[type.img];
         let scale = type.scale || 1;
         let brickW = Math.ceil((img.naturalWidth * scale) / cellSize);
@@ -259,6 +256,7 @@ function randomPlaceBricks() {
             }
             tries++;
         }
+
         if (!placed) break;
     }
 }
