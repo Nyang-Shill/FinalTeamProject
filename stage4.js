@@ -200,11 +200,7 @@ function startGame() {
         // 인트로 팝업 표시
         $('#intro-modal').fadeIn(200);
         
-        // 5초 후 자동 닫힘
-        setTimeout(() => {
-            $('#intro-modal').fadeOut(200);
-        }, 5000);
-        
+
         // 타이머 시작
         const timerInterval = setInterval(() => {
             if (timeLeft > 0 && gameStarted) {
@@ -236,6 +232,7 @@ function startGame() {
         console.error('게임 시작 에러:', error);
         gameStarted = false;
     }
+
 }
 
 // 게임 루프 함수
@@ -287,6 +284,7 @@ function gameLoop() {
         gameStarted = false;
     }
 }
+
 
 // DOM이 로드되면 게임 초기화
 document.addEventListener('DOMContentLoaded', function() {
