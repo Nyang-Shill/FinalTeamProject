@@ -200,9 +200,7 @@ function startGame() {
         // 인트로 팝업 표시
         $('#intro-modal').fadeIn(200);
         
-        
 
-        
         // 타이머 시작
         const timerInterval = setInterval(() => {
             if (timeLeft > 0 && gameStarted) {
@@ -292,6 +290,7 @@ function gameLoop() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log("DOM 로드 완료");
     initGame();
+
 });
 
 // jQuery ready 이벤트
@@ -312,7 +311,6 @@ $(document).ready(function() {
     $('.clear-score-btn').click(function() {
         alert(`최종 점수: ${score}원`);
     });
-
      
     //컷신추가!!
     // 현재 이미지 인덱스 관리
@@ -374,6 +372,7 @@ $(document).ready(function() {
         });
     });
 });
+
 
 console.log("JS 파일 로드됨");
 
