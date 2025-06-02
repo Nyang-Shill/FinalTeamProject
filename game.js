@@ -19,6 +19,8 @@ let isRespawning = false;
 let gameStarted = false;
 let score = 0;
 let animationId = null;
+let isPowerUp = false;
+let powerUpTimeout = null;
 
 // 공 이미지 관리
 const ballImages = {
@@ -121,7 +123,7 @@ const breakImages = [
     'block_images/frame1_3.PNG',
     'block_images/box1_2.PNG',
     'block_images/box1_3.PNG',
-    'block_images/chur.PNG'
+    'block_images/chur.PNG',
 ];
 
 // 기존 이미지와 깨지는 이미지 모두 로드
@@ -130,6 +132,7 @@ const breakImages = [
         imagesToLoad++;
         const image = new Image();
         image.src = imgPath;
+        console.log(imgPath);
         image.onload = () => {
             imagesLoaded++;
             if (imagesLoaded === imagesToLoad) {
@@ -190,6 +193,28 @@ function placeBrick(row, col, brickW, brickH, brickObj) {
 
 function randomPlaceBricks() {
     grid = Array.from({ length: gridRows }, () => Array(gridCols).fill(0));
+
+    // 각 벽돌 종류별로 최소 1개씩 먼저 배치
+    for (let type of brickTypes) {
+        let img = brickImages[type.img];
+        let scale = type.scale || 1;
+        let brickW = Math.ceil((img.naturalWidth * scale) / cellSize);
+        let brickH = Math.ceil((img.naturalHeight * scale) / cellSize);
+        let tries = 0;
+        let placed = false;
+
+        while (tries < 100 && !placed) {
+            let row = Math.floor(Math.random() * (brickAreaRows - brickH));
+            let col = Math.floor(Math.random() * (gridCols - brickW));
+            if (canPlaceBrick(row, col, brickW, brickH)) {
+                placeBrick(row, col, brickW, brickH, type);
+                placed = true;
+            }
+            tries++;
+        }
+    }
+
+    // 나머지 벽돌 랜덤 배치
     for (let n = 0; n < 1000; n++) {
         let type = brickTypes[Math.floor(Math.random() * brickTypes.length)];
         let img = brickImages[type.img];
@@ -198,6 +223,7 @@ function randomPlaceBricks() {
         let brickH = Math.ceil((img.naturalHeight * scale) / cellSize);
         let tries = 0;
         let placed = false;
+
         while (tries < 100 && !placed) {
             let row = Math.floor(Math.random() * (brickAreaRows - brickH));
             let col = Math.floor(Math.random() * (gridCols - brickW));
@@ -274,26 +300,38 @@ function collisionDetection() {
         if (brick.status === 1) {
             if (x > brick.x && x < brick.x + brick.w && y > brick.y && y < brick.y + brick.h) {
                 dy = -dy;
-                brick.hp--;
+
+                // 파워업 상태일 때 hp를 2 감소, 아닐 때는 1 감소
+                if (isPowerUp) {
+                    brick.hp -= 2;
+                } else {
+                    brick.hp--;
+                }
 
                 // stage1의 벽돌 처리
                 if (brick.img.includes('glassCup_1') && currentLevel === 0) {
                     if (brick.hp <= 0) {
                         brick.breakImg = 'block_images/glassCup_2.PNG';
                         brick.status = 2;
-                        setTimeout(() => { brick.status = 0; }, 300);
+                        setTimeout(() => {
+                            brick.status = 0;
+                        }, 300);
                     }
                 } else if (brick.img.includes('plate1_1')) {
                     if (brick.hp <= 0) {
                         brick.breakImg = 'block_images/plate1_2.PNG';
                         brick.status = 2;
-                        setTimeout(() => { brick.status = 0; }, 300);
+                        setTimeout(() => {
+                            brick.status = 0;
+                        }, 300);
                     }
                 } else if (brick.img.includes('frame2_1')) {
                     if (brick.hp <= 0) {
                         brick.breakImg = 'block_images/frame2_2.PNG';
                         brick.status = 2;
-                        setTimeout(() => { brick.status = 0; }, 300);
+                        setTimeout(() => {
+                            brick.status = 0;
+                        }, 300);
                     }
                 }
                 // stage2의 벽돌 처리 (명확한 분기)
@@ -301,7 +339,9 @@ function collisionDetection() {
                     if (brick.hp <= 0) {
                         brick.breakImg = 'block_images/glassCup_2.PNG';
                         brick.status = 2;
-                        setTimeout(() => { brick.status = 0; }, 300);
+                        setTimeout(() => {
+                            brick.status = 0;
+                        }, 300);
                     }
                 }
                 // plate2 계열
@@ -311,13 +351,17 @@ function collisionDetection() {
                     } else if (brick.hp <= 0) {
                         brick.breakImg = 'block_images/plate2_3.PNG';
                         brick.status = 2;
-                        setTimeout(() => { brick.status = 0; }, 300);
+                        setTimeout(() => {
+                            brick.status = 0;
+                        }, 300);
                     }
                 } else if (brick.img === 'block_images/plate2_2.PNG') {
                     if (brick.hp <= 0) {
                         brick.breakImg = 'block_images/plate2_3.PNG';
                         brick.status = 2;
-                        setTimeout(() => { brick.status = 0; }, 300);
+                        setTimeout(() => {
+                            brick.status = 0;
+                        }, 300);
                     }
                 }
                 // frame1 계열
@@ -327,13 +371,17 @@ function collisionDetection() {
                     } else if (brick.hp <= 0) {
                         brick.breakImg = 'block_images/frame1_3.PNG';
                         brick.status = 2;
-                        setTimeout(() => { brick.status = 0; }, 300);
+                        setTimeout(() => {
+                            brick.status = 0;
+                        }, 300);
                     }
                 } else if (brick.img === 'block_images/frame1_2.PNG') {
                     if (brick.hp <= 0) {
                         brick.breakImg = 'block_images/frame1_3.PNG';
                         brick.status = 2;
-                        setTimeout(() => { brick.status = 0; }, 300);
+                        setTimeout(() => {
+                            brick.status = 0;
+                        }, 300);
                     }
                 }
                 // box1 계열
@@ -344,51 +392,80 @@ function collisionDetection() {
                         brick.img = 'block_images/box1_3.PNG';
                     } else if (brick.hp <= 0) {
                         brick.breakImg = 'block_images/chur.PNG';
-                        brick.originalW = brick.w;
-                        brick.originalH = brick.h;
-                        brick.w = brick.w * 1.5;
-                        brick.h = brick.h * 1.5;
                         brick.status = 2;
-                        setTimeout(() => { brick.status = 0; }, 500);
+                        // chur를 얻으면 파워업 활성화
+                        isPowerUp = true;
+                        // 이전 파워업 타이머가 있다면 취소
+                        if (powerUpTimeout) {
+                            clearTimeout(powerUpTimeout);
+                        }
+                        // 5초 후 파워업 비활성화
+                        powerUpTimeout = setTimeout(() => {
+                            isPowerUp = false;
+                            powerUpTimeout = null;
+                        }, 5000);
+                        setTimeout(() => {
+                            brick.status = 0;
+                        }, 500);
                     }
                 } else if (brick.img === 'block_images/box1_2.PNG') {
                     if (brick.hp === 1) {
                         brick.img = 'block_images/box1_3.PNG';
                     } else if (brick.hp <= 0) {
                         brick.breakImg = 'block_images/chur.PNG';
-                        brick.originalW = brick.w;
-                        brick.originalH = brick.h;
-                        brick.w = brick.w * 1.5;
-                        brick.h = brick.h * 1.5;
                         brick.status = 2;
-                        setTimeout(() => { brick.status = 0; }, 500);
+                        // chur를 얻으면 파워업 활성화
+                        isPowerUp = true;
+                        // 이전 파워업 타이머가 있다면 취소
+                        if (powerUpTimeout) {
+                            clearTimeout(powerUpTimeout);
+                        }
+                        // 5초 후 파워업 비활성화
+                        powerUpTimeout = setTimeout(() => {
+                            isPowerUp = false;
+                            powerUpTimeout = null;
+                        }, 5000);
+                        setTimeout(() => {
+                            brick.status = 0;
+                        }, 500);
                     }
                 } else if (brick.img === 'block_images/box1_3.PNG') {
                     if (brick.hp <= 0) {
                         brick.breakImg = 'block_images/chur.PNG';
-                        brick.originalW = brick.w;
-                        brick.originalH = brick.h;
-                        brick.w = brick.w * 1.5;
-                        brick.h = brick.h * 1.5;
                         brick.status = 2;
-                        setTimeout(() => { brick.status = 0; }, 500);
+                        // chur를 얻으면 파워업 활성화
+                        isPowerUp = true;
+                        // 이전 파워업 타이머가 있다면 취소
+                        if (powerUpTimeout) {
+                            clearTimeout(powerUpTimeout);
+                        }
+                        // 5초 후 파워업 비활성화
+                        powerUpTimeout = setTimeout(() => {
+                            isPowerUp = false;
+                            powerUpTimeout = null;
+                        }, 5000);
+                        setTimeout(() => {
+                            brick.status = 0;
+                        }, 500);
                     }
                 }
 
                 // 벽돌이 깨질 때, 해당 벽돌의 최초 hp만큼 점수 증가
                 if (brick.hp <= 0) {
                     let maxHp = 1;
-                    if (currentLevel === 1) {  // stage2일 때
+                    if (currentLevel === 1) {
+                        // stage2일 때
                         if (brick.img.includes('glassCup_1')) {
-                            maxHp = 1;  // 유리컵: 1점
+                            maxHp = 1; // 유리컵: 1점
                         } else if (brick.img.includes('plate2_')) {
-                            maxHp = 2;  // 그릇: 2점
+                            maxHp = 2; // 그릇: 2점
                         } else if (brick.img.includes('frame1_')) {
-                            maxHp = 2;  // 액자: 2점
+                            maxHp = 2; // 액자: 2점
                         } else if (brick.img.includes('box1_')) {
-                            maxHp = 3;  // 택배박스: 3점
+                            maxHp = 3; // 택배박스: 3점
                         }
-                    } else {  // stage1일 때는 기존 로직 유지
+                    } else {
+                        // stage1일 때는 기존 로직 유지
                         const found = levels[currentLevel].find((t) => t.img === brick.img);
                         if (found) maxHp = found.hp;
                     }
@@ -423,6 +500,14 @@ function draw() {
     if (isGameClear || isGameOver) return;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 파워업 상태일 때 캔버스 테두리 그리기
+    if (isPowerUp) {
+        ctx.strokeStyle = '#FFD700'; // 노란색
+        ctx.lineWidth = 5;
+        ctx.strokeRect(0, 0, canvas.width, canvas.height);
+    }
+
     drawBricks();
     if (!isRespawning) drawBall();
     drawPaddle();
@@ -554,6 +639,11 @@ function createTestBrick() {
 function restartGame() {
     isGameOver = false;
     isGameClear = false;
+    isPowerUp = false;
+    if (powerUpTimeout) {
+        clearTimeout(powerUpTimeout);
+        powerUpTimeout = null;
+    }
     x = canvas.width / 2;
     y = canvas.height - paddleHeight - 15;
     dx = BASE_SPEED_X * (Math.random() > 0.5 ? 1 : -1);
