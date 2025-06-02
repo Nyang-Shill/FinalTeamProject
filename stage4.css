@@ -1,79 +1,79 @@
 @font-face {
-    font-family: 'Ownglyph_ParkDaHyun';
-    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2411-3@1.0/Ownglyph_ParkDaHyun.woff2') format('woff2');
-    font-weight: normal;
-    font-style: normal;
+  font-family: 'Ownglyph_ParkDaHyun';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2411-3@1.0/Ownglyph_ParkDaHyun.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
 }
 
 body {
-  margin: 0;
-  background-color: #fff8e6;
-  font-family: 'Ownglyph_ParkDaHyun', sans-serif;
-  height: 100vh;
+margin: 0;
+background-color: #fff8e6;
+font-family: 'Ownglyph_ParkDaHyun', sans-serif;
+height: 100vh;
 }
 
 .stage-container {
-  min-height: 100vh;
-  width: 100vw;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+min-height: 100vh;
+width: 100vw;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
 }
 
 .stage-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  gap: 10px;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+height: 100vh;
+gap: 10px;
 }
 
 .stage-title {
-  background: #ddd;
-  padding: 18px 50px;
-  font-size: 30px;
-  border-radius: 4px;
-  text-align: center;
-  margin-bottom: 10px;
+background: #ddd;
+padding: 18px 50px;
+font-size: 30px;
+border-radius: 4px;
+text-align: center;
+margin-bottom: 10px;
 }
 
 #game-canvas {
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 8px;
-  box-shadow: 0 0 16px rgba(0,0,0,0.06);
-  display: block;
+background: #fff;
+border-radius: 8px;
+box-shadow: 0 0 16px rgba(0,0,0,0.06);
+display: block;
 }
 
 .info-panel {
-  position: fixed;
-  top: 120px;
-  right: 100px;
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
-  z-index: 10;
+position: fixed;
+top: 120px;
+right: 100px;
+display: flex;
+flex-direction: column;
+gap: 40px;
+z-index: 10;
 }
 
 .info-box {
-  background: #ddd;
-  padding: 18px 0;
-  min-width: 160px;
-  text-align: center;
-  font-size: 26px;
-  border-radius: 4px;
+background: #ddd;
+padding: 18px 0;
+min-width: 160px;
+text-align: center;
+font-size: 26px;
+border-radius: 4px;
 }
 
 .modal-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  width: 100vw; height: 100vh;
-  background: rgba(0,0,0,0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
+position: fixed;
+top: 0; left: 0; right: 0; bottom: 0;
+width: 100vw; height: 100vh;
+background: rgba(0,0,0,0.4);
+display: flex;
+align-items: center;
+justify-content: center;
+z-index: 1000;
 }
 
 .modal-content {
@@ -142,22 +142,22 @@ body {
 }
 
 .time-remaining {
-  font-size: 36px;
-  color: #222;
-  text-align: center;
-  margin-top: 8px;
-  margin-bottom: 32px;
-  font-weight: bold;
+font-size: 36px;
+color: #222;
+text-align: center;
+margin-top: 8px;
+margin-bottom: 32px;
+font-weight: bold;
 }
 
 #clear-modal .modal-content {
-  min-width: 500px;
-  min-height: 350px;
-  padding: 48px 32px 32px 32px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+min-width: 500px;
+min-height: 350px;
+padding: 48px 32px 32px 32px;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
 }
 
 .clear-title {
