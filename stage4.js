@@ -188,9 +188,10 @@ function startGame() {
         lastCatMove = Date.now();
         finalBallsCreated = false;
         
-        // 고양이 초기 위치 설정 (왼쪽에서 시작)
-        cat.x = 50;
-        cat.y = canvas.height / 2 - cat.size / 2;
+        // 고양이 초기 위치 설정 (왼쪽 또는 오른쪽에서 시작)
+        const isLeftSide = Math.random() < 0.5; // 50% 확률로 왼쪽/오른쪽 결정
+        cat.x = isLeftSide ? 50 : canvas.width - cat.size - 50;
+        cat.y = Math.random() * (canvas.height - cat.size - 100) + 50; // 50px 마진
         
         // 게임 요소 생성
         createBricks();
@@ -255,11 +256,8 @@ function gameLoop() {
         const currentTime = Date.now();
         if (currentTime - lastCatMove > catMoveInterval) {
             // 고양이가 왼쪽에 있으면 오른쪽으로, 오른쪽에 있으면 왼쪽으로 이동
-            if (cat.x < canvas.width / 2) {
-                cat.x = 50; // 왼쪽 위치 고정
-            } else {
-                cat.x = canvas.width - cat.size - 50; // 오른쪽 위치 고정
-            }
+            const isLeftSide = cat.x < canvas.width / 2;
+            cat.x = isLeftSide ? canvas.width - cat.size - 50 : 50;
             
             // 위아래로만 랜덤하게 이동
             cat.y = Math.random() * (canvas.height - cat.size - 100) + 50; // 50px 마진
