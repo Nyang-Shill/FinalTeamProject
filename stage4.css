@@ -40,7 +40,7 @@ body {
 }
 
 #game-canvas {
-  background: rgba(255, 255, 255, 0.5);
+  background: #fff;
   border-radius: 8px;
   box-shadow: 0 0 16px rgba(0,0,0,0.06);
   display: block;
