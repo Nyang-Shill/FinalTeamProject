@@ -314,15 +314,15 @@ function drawPaddle() {
     }
 }
 
-// function showClearModal() {
-//     if (animationId) {
-//         cancelAnimationFrame(animationId);
-//         animationId = null;
-//     }
-//     clearInterval(timerInterval); // 타이머도 정지
-//     $('.clear-score-btn').text(`점수: ${score}`);
-//     $('#clear-modal').fadeIn(200);
-// }
+function showClearModal() {
+    if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+    }
+    clearInterval(timerInterval); // 타이머도 정지
+    $('.clear-score-btn').text(`점수: ${score}`);
+    $('#clear-modal').fadeIn(200);
+}
 
 function collisionDetection() {
     for (let brick of bricks) {
@@ -528,7 +528,7 @@ function collisionDetection() {
                     setTimeout(() => {
                         console.log('1.5초간 기다립니다.');
                         isGameClear = true;
-                        // showClearModal(); // 클리어 모달 띄움
+                        showClearModal(); // 클리어 모달 띄움
                         cancelAnimationFrame(animationId); // 애니메이션 중단
                         animationId = null;
                         if (currentLevel === 2) {
