@@ -58,6 +58,7 @@ const catThemeMapping = {
 let lastCatMove = 0;
 let catMoveInterval = 10000; // 10초
 let finalBallsCreated = false;
+let paddleRadius = 280; // 패들이 움직일 원의 반지름 (벽돌 배치 원보다 약간 더 크게)
 
 // 게임 초기화 함수
 function initGame() {
@@ -335,15 +336,20 @@ function createBricks() {
     
     for (let i = 0; i < 15; i++) {
         const angle = Math.random() * Math.PI * 2;
-        const radius = 80 + Math.random() * 50;
+        const radius = 180 + Math.random() * 80; // 원의 반지름을 180~260으로 설정
         const x = centerX + radius * Math.cos(angle);
         const y = centerY + radius * Math.sin(angle);
         const type = types[Math.floor(Math.random() * types.length)];
         const brickType = brickTypes[type];
         
+        // 벽돌이 화면 밖으로 나가지 않도록 위치 조정
+        const margin = 20; // 화면 가장자리 여백
+        const adjustedX = Math.max(margin, Math.min(canvas.width - brickType.width - margin, x));
+        const adjustedY = Math.max(margin, Math.min(canvas.height - brickType.height - margin, y));
+        
         bricks.push({
-            x, 
-            y, 
+            x: adjustedX, 
+            y: adjustedY, 
             w: brickType.width,
             h: brickType.height,
             hp: 2,
@@ -390,14 +396,13 @@ function drawBricks() {
 
 function drawPaddle() {
     try {
-        const radius = 200;
-        const x = centerX + Math.cos(paddle.angle) * radius;
-        const y = centerY + Math.sin(paddle.angle) * radius;
+        const x = centerX + Math.cos(paddle.angle) * paddleRadius;
+        const y = centerY + Math.sin(paddle.angle) * paddleRadius;
 
         if (handImg && handImg.complete && handImg.naturalWidth !== 0) {
             ctx.save();
             ctx.translate(x, y);
-            ctx.rotate(paddle.angle + Math.PI);
+            ctx.rotate(paddle.angle + Math.PI); // 180도 회전
             ctx.drawImage(handImg, -paddle.width / 2, -paddle.height / 2, paddle.width, paddle.height);
             ctx.restore();
         } else {
@@ -459,17 +464,34 @@ function updateScore() {
 
 function updateBalls() {
     balls.forEach(ball => {
-        ball.x += ball.dx;
-        ball.y += ball.dy;
+        // 공의 다음 위치 계산
+        const nextX = ball.x + ball.dx;
+        const nextY = ball.y + ball.dy;
 
-        // 벽 반사
-        if (ball.x < 0 || ball.x > canvas.width) ball.dx *= -1;
-        if (ball.y < 0 || ball.y > canvas.height) ball.dy *= -1;
+        // 경계 체크 및 위치 조정
+        if (nextX - ball.radius < 0) {
+            ball.x = ball.radius;
+            ball.dx = Math.abs(ball.dx);
+        } else if (nextX + ball.radius > canvas.width) {
+            ball.x = canvas.width - ball.radius;
+            ball.dx = -Math.abs(ball.dx);
+        } else {
+            ball.x = nextX;
+        }
+
+        if (nextY - ball.radius < 0) {
+            ball.y = ball.radius;
+            ball.dy = Math.abs(ball.dy);
+        } else if (nextY + ball.radius > canvas.height) {
+            ball.y = canvas.height - ball.radius;
+            ball.dy = -Math.abs(ball.dy);
+        } else {
+            ball.y = nextY;
+        }
 
         // 패들 충돌
-        const radius = 200;
-        const px = centerX + Math.cos(paddle.angle) * radius;
-        const py = centerY + Math.sin(paddle.angle) * radius;
+        const px = centerX + Math.cos(paddle.angle) * paddleRadius;
+        const py = centerY + Math.sin(paddle.angle) * paddleRadius;
         const dist = Math.hypot(ball.x - px, ball.y - py);
         if (dist < 40) {
             const angle = Math.atan2(ball.y - centerY, ball.x - centerX);
