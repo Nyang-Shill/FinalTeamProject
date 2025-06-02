@@ -5,6 +5,68 @@ $(document).ready(function () {
   const selectedCatTheme = localStorage.getItem('selectedCatTheme');
   console.log('stage3에서 읽은 테마:', selectedCatTheme);
   
+  //컷신추가!!
+    // 현재 이미지 인덱스 관리
+    let currentImageIndex = 1;
+    const maxImageIndex = 5;  // 최대 이미지 번호
+
+    // 화살표 표시/숨김 업데이트 함수
+    function updateArrows() {
+        if (currentImageIndex === 1) {
+            $('.left-arrow').css('visibility', 'hidden');
+        } else {
+            $('.left-arrow').css('visibility', 'visible');
+        }
+
+        if (currentImageIndex === maxImageIndex) {
+            $('.right-arrow').css('visibility', 'hidden');
+            $('#skip-btn').text('게임 시작');
+        } else {
+            $('.right-arrow').css('visibility', 'visible');
+            $('#skip-btn').text('SKIP');
+        }
+    }
+
+    // 이미지 변경 함수
+    function changeImage(index) {
+        const introImage = $('.intro-image');
+        introImage.fadeOut(200, function() {
+            introImage.attr('src', `scenes_images/stage4_${index}.png`);
+            introImage.fadeIn(200);
+            updateArrows();  // 이미지 변경 후 화살표 상태 업데이트
+        });
+    }
+
+    // 오른쪽 화살표 클릭 이벤트
+    $('.right-arrow').click(function() {
+        if (currentImageIndex < maxImageIndex) {
+            currentImageIndex++;
+            changeImage(currentImageIndex);
+        }
+    });
+
+    // 왼쪽 화살표 클릭 이벤트
+    $('.left-arrow').click(function() {
+        if (currentImageIndex > 1) {
+            currentImageIndex--;
+            changeImage(currentImageIndex);
+        }
+    });
+
+    // 인트로 팝업 자동 표시
+    $('#intro-modal').fadeIn(200);
+    updateArrows();  // 초기 화살표 상태 설정
+
+    // SKIP/게임 시작 버튼 클릭 시 즉시 닫힘
+    $('#skip-btn').click(function () {
+        $('#intro-modal').fadeOut(200, function () {
+            if (typeof startGame === 'function') startGame();
+            startGameTimer();
+        });
+    });
+
+
+  
   // 캔버스 초기화
   const canvas = document.getElementById('game-canvas'); // gameCanvas -> game-canvas로 수정
   const ctx = canvas.getContext('2d');
@@ -328,10 +390,6 @@ $(document).ready(function () {
     // 인트로 팝업 자동 표시
     $('#intro-modal').fadeIn(200);
 
-    // 5초 후 자동 닫힘
-    let introTimeout = setTimeout(function () {
-      $('#intro-modal').fadeOut(200);
-    }, 5000);
 
     // SKIP 버튼 클릭 시 즉시 닫힘
     $('#skip-btn').click(function () {
