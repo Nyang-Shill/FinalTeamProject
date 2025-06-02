@@ -1,8 +1,8 @@
 @font-face {
-  font-family: 'Ownglyph_ParkDaHyun';
-  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2411-3@1.0/Ownglyph_ParkDaHyun.woff2') format('woff2');
-  font-weight: normal;
-  font-style: normal;
+    font-family: 'Ownglyph_ParkDaHyun';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2411-3@1.0/Ownglyph_ParkDaHyun.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
 }
 
 body {
@@ -10,7 +10,6 @@ body {
   background-color: #fff8e6;
   font-family: 'Ownglyph_ParkDaHyun', sans-serif;
   height: 100vh;
-  overflow: hidden;
 }
 
 .stage-container {
@@ -20,7 +19,6 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  position: relative;
 }
 
 .stage-content {
@@ -46,7 +44,6 @@ body {
   border-radius: 8px;
   box-shadow: 0 0 16px rgba(0,0,0,0.06);
   display: block;
-  border: 2px solid #ccc;
 }
 
 .info-panel {
@@ -68,31 +65,10 @@ body {
   border-radius: 4px;
 }
 
-.score-display {
-  font-size: 24px;
-  color: #333;
-  text-align: center;
-  margin-top: 10px;
-  font-weight: bold;
-}
-
-.time-remaining {
-  font-size: 36px;
-  color: #222;
-  text-align: center;
-  margin-top: 8px;
-  margin-bottom: 32px;
-  font-weight: bold;
-}
-
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100vw;
-  height: 100vh;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100vw; height: 100vh;
   background: rgba(0,0,0,0.4);
   display: flex;
   align-items: center;
@@ -132,9 +108,17 @@ body {
   margin-top: 8px;
   font-family: 'Ownglyph_ParkDaHyun', sans-serif;
 }
-
 #skip-btn:hover {
   background: #555;
+}
+
+.time-remaining {
+  font-size: 36px;
+  color: #222;
+  text-align: center;
+  margin-top: 8px;
+  margin-bottom: 32px;
+  font-weight: bold;
 }
 
 #clear-modal .modal-content {
