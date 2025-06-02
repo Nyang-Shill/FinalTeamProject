@@ -11,34 +11,72 @@ $(document).ready(function () {
 
     // 저장된 테마 적용
     const selectedCatTheme = localStorage.getItem('selectedCatTheme');
-    console.log('stage1에서 읽은 테마:', selectedCatTheme); // 읽은 값 확인
+    console.log('stage1에서 읽은 테마:', selectedCatTheme);
 
     if (selectedCatTheme) {
-        // 테마 값이 'cat1', 'cat2', 'cat3'인 경우에만 적용
         if (selectedCatTheme === 'cat1' || selectedCatTheme === 'cat2' || selectedCatTheme === 'cat3') {
             console.log('테마 적용:', selectedCatTheme);
             changeBallImage(selectedCatTheme);
         }
     }
 
+    // 현재 이미지 인덱스 관리
+    let currentImageIndex = 1;
+    const maxImageIndex = 7;  // 최대 이미지 번호
+
+    // 화살표 표시/숨김 업데이트 함수
+    function updateArrows() {
+        if (currentImageIndex === 1) {
+            $('.left-arrow').css('visibility', 'hidden');
+        } else {
+            $('.left-arrow').css('visibility', 'visible');
+        }
+
+        if (currentImageIndex === maxImageIndex) {
+            $('.right-arrow').css('visibility', 'hidden');
+            $('#skip-btn').text('게임 시작');
+        } else {
+            $('.right-arrow').css('visibility', 'visible');
+            $('#skip-btn').text('SKIP');
+        }
+    }
+
+    // 이미지 변경 함수
+    function changeImage(index) {
+        const introImage = $('.intro-image');
+        introImage.fadeOut(200, function() {
+            introImage.attr('src', `scenes_images/stage1_${index}.png`);
+            introImage.fadeIn(200);
+            updateArrows();  // 이미지 변경 후 화살표 상태 업데이트
+        });
+    }
+
+    // 오른쪽 화살표 클릭 이벤트
+    $('.right-arrow').click(function() {
+        if (currentImageIndex < maxImageIndex) {
+            currentImageIndex++;
+            changeImage(currentImageIndex);
+        }
+    });
+
+    // 왼쪽 화살표 클릭 이벤트
+    $('.left-arrow').click(function() {
+        if (currentImageIndex > 1) {
+            currentImageIndex--;
+            changeImage(currentImageIndex);
+        }
+    });
+
     // 인트로 팝업 자동 표시
     $('#intro-modal').fadeIn(200);
+    updateArrows();  // 초기 화살표 상태 설정
 
-    // 5초 후 자동 닫힘
-    let introTimeout = setTimeout(function () {
+    // SKIP/게임 시작 버튼 클릭 시 즉시 닫힘
+    $('#skip-btn').click(function () {
         $('#intro-modal').fadeOut(200, function () {
             if (typeof startGame === 'function') startGame();
             startGameTimer();
         });
-    }, 5000);
-
-    // SKIP 버튼 클릭 시 즉시 닫힘
-    $('#skip-btn').click(function () {
-        $('#intro-modal').fadeOut(200, function () {
-            if (typeof startGame === 'function') startGame(); // ✅ 추가
-            startGameTimer();
-        });
-        clearTimeout(introTimeout);
     });
 
     // 제한시간 타이머

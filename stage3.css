@@ -40,7 +40,7 @@ body {
 }
 
 #game-canvas {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.5);
   border-radius: 8px;
   box-shadow: 0 0 16px rgba(0,0,0,0.06);
   display: block;
@@ -83,18 +83,36 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 850px;
+  min-width: 600px;
   min-height: 550px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.15);
   position: relative;
 }
 
-.intro-image {
-  max-width: 720px;
-  max-height: 440px;
+.intro-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
   margin-bottom: 40px;
+}
+
+.intro-image {
+  max-width: 500px;
+  max-height: 440px;
   border-radius: 16px;
   object-fit: contain;
+}
+
+.arrow-image {
+  width: 70px;
+  height: 70px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.arrow-image:hover {
+  transform: scale(1.1);
 }
 
 #skip-btn {
