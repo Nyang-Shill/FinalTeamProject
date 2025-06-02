@@ -220,3 +220,24 @@ button:hover {
     opacity: 0.7;
 }
   
+#startBtn {
+    color: #fff;
+    background-color: #71adfa;
+}
+
+#startBtn:hover {
+    border: 2px solid #5b7fe7;
+    background-color: #fff;
+    color: #71adfa;
+}
+
+#themeBtn {
+    color: #fff;
+    background-color: #71adfa;
+}
+
+#themeBtn:hover {
+    border: 2px solid #5b7fe7;
+    background-color: #fff;
+    color: #71adfa;
+}
