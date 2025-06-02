@@ -35,14 +35,14 @@ const brickTypes = {
     },
     '액자': {
         images: ['frame1_1.PNG', 'frame1_2.PNG', 'frame1_3.PNG'],
-        width: 70,
-        height: 70,
+        width: 100,
+        height: 100,
         breakDelay: 300 // 0.3초
     },
     '택배상자': {
         images: ['box1_1.PNG', 'box1_2.PNG', 'box1_3.PNG'],
-        width: 80,
-        height: 80,
+        width: 120,
+        height: 120,
         breakDelay: 300 // 0.3초
     }
 };
