@@ -18,19 +18,13 @@ $(document).ready(function () {
   ctx.textAlign = 'center';
   ctx.fillText('여기서 게임이 시작됩니다!', canvas.width/2, canvas.height/2);
 
-  // 인트로 팝업 자동 표시
-  $('#intro-modal').fadeIn(200);
+  let currentImageIndex = 1;
+  const maxImageIndex = 2;
 
-  // 5초 후 자동 닫힘
-  let introTimeout = setTimeout(function () {
-    $('#intro-modal').fadeOut(200, startGameTimer);
-  }, 5000);
-
-  // SKIP 버튼 클릭 시 즉시 닫힘
-  $('#skip-btn').click(function () {
-    $('#intro-modal').fadeOut(200, startGameTimer);
-    clearTimeout(introTimeout);
-  });
+  // 인트로 모달 표시
+  $('#intro-modal').show();
+  updateArrowVisibility();
+  updateSkipButton();
 
   // 제한시간 타이머
   let timeLeft = 30;
@@ -53,12 +47,72 @@ $(document).ready(function () {
     $('#clear-modal').fadeIn(200);
   }
 
-  // 팝업 버튼 동작 (예시)
+  // 팝업 버튼 동작
   $('.clear-next-btn').click(function () {
     window.location.href = 'stage4.html';
   });
   $('.clear-home-btn').click(function () {
     window.location.href = 'home.html';
   });
-  // 점수 버튼은 필요에 따라 동작 추가
+  
+  // 왼쪽 화살표 클릭
+  $('.left-arrow').click(function() {
+    if (currentImageIndex > 1) {
+      currentImageIndex--;
+      updateImage();
+      updateArrowVisibility();
+      updateSkipButton();
+    }
+  });
+  
+  // 오른쪽 화살표 클릭
+  $('.right-arrow').click(function() {
+    if (currentImageIndex < maxImageIndex) {
+      currentImageIndex++;
+      updateImage();
+      updateArrowVisibility();
+      updateSkipButton();
+    }
+  });
+  
+  // SKIP/게임시작 버튼 클릭
+  $('#skip-btn').click(function() {
+    $('#intro-modal').hide();
+    startGameTimer();
+  });
+  
+  // 이미지 업데이트 함수
+  function updateImage() {
+    $('.intro-image').attr('src', `scenes_images/stage3_${currentImageIndex}.png`);
+  }
+
+  // 화살표 가시성 업데이트 함수
+  function updateArrowVisibility() {
+    if (currentImageIndex === 1) {
+      $('.left-arrow').css('visibility', 'hidden');
+    } else {
+      $('.left-arrow').css('visibility', 'visible');
+    }
+
+    if (currentImageIndex === maxImageIndex) {
+      $('.right-arrow').css('visibility', 'hidden');
+    } else {
+      $('.right-arrow').css('visibility', 'visible');
+    }
+  }
+
+  // SKIP/게임시작 버튼 업데이트 함수
+  function updateSkipButton() {
+    if (currentImageIndex === maxImageIndex) {
+      $('#skip-btn').text('게임시작');
+    } else {
+      $('#skip-btn').text('SKIP');
+    }
+  }
 });
+
+// 게임 시작 함수
+function startGame() {
+  // 게임 시작 로직
+  console.log('Game started');
+}
