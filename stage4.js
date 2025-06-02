@@ -200,7 +200,10 @@ function startGame() {
         // 인트로 팝업 표시
         $('#intro-modal').fadeIn(200);
         
-        
+        // 5초 후 자동 닫힘
+        setTimeout(() => {
+            $('#intro-modal').fadeOut(200);
+        }, 5000);
         
         // 타이머 시작
         const timerInterval = setInterval(() => {
@@ -233,7 +236,6 @@ function startGame() {
         console.error('게임 시작 에러:', error);
         gameStarted = false;
     }
-
 }
 
 // 게임 루프 함수
@@ -290,6 +292,7 @@ function gameLoop() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log("DOM 로드 완료");
     initGame();
+
 });
 
 // jQuery ready 이벤트
@@ -371,6 +374,7 @@ $(document).ready(function() {
         });
     });
 });
+
 
 console.log("JS 파일 로드됨");
 
@@ -651,5 +655,6 @@ function setupEventListeners() {
         const dy = e.clientY - rect.top - centerY;
         paddle.angle = Math.atan2(dy, dx);
     });
+
 }
 
