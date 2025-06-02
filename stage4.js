@@ -16,7 +16,7 @@ let lastSpawn = 0, maxBalls = 3;
 let gameStarted = false;
 let selectedCatTheme = null;
 
-let paddle = { x: 0, y: 0, width: 60, height: 60, angle: 0 };
+let paddle = { x: 0, y: 0, width: 80, height: 80, angle: 0 };
 let cat = { x: 50, y: 50, size: 80 };
 
 // 벽돌 타입 정의
@@ -35,14 +35,14 @@ const brickTypes = {
     },
     '액자': {
         images: ['frame1_1.PNG', 'frame1_2.PNG', 'frame1_3.PNG'],
-        width: 100,
-        height: 100,
+        width: 90,  // 액자 크기 증가
+        height: 90, // 액자 크기 증가
         breakDelay: 300 // 0.3초
     },
     '택배상자': {
         images: ['box1_1.PNG', 'box1_2.PNG', 'box1_3.PNG'],
-        width: 120,
-        height: 120,
+        width: 100, // 택배상자 크기 증가
+        height: 100, // 택배상자 크기 증가
         breakDelay: 300 // 0.3초
     }
 };
