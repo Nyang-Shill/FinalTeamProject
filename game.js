@@ -477,15 +477,15 @@ function isAllBricksCleared() {
 }
 
 function draw() {
-    if (animationId) cancelAnimationFrame(animationId);
-    animationId = requestAnimationFrame(draw);
-
     if (isGameClear || isGameOver) {
         // 게임이 클리어되거나 오버되면 애니메이션 중지
         cancelAnimationFrame(animationId);
         animationId = null;
         return;
     }
+
+    if (animationId) cancelAnimationFrame(animationId);
+    animationId = requestAnimationFrame(draw);
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
@@ -502,7 +502,7 @@ function draw() {
     collisionDetection();
 
     // stage2에서 hand 이미지 그리기와 충돌 처리
-    if (currentLevel === 1 && handImage.complete) {
+    if (currentLevel === 1 && handImage.complete && !isGameClear) {
         const handWidth = handImage.naturalWidth / 3;
         const handHeight = handImage.naturalHeight / 3;
         const handY = canvas.height / 2 - handHeight / 2;
