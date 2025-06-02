@@ -100,7 +100,7 @@ const levels = [
         { img: 'block_images/plate2_1.PNG', scale: 0.2, hp: 2, name: '그릇' },
         { img: 'block_images/frame1_1.PNG', scale: 0.4, hp: 2, name: '액자' },
         { img: 'block_images/box1_1.PNG', scale: 0.4, hp: 3, name: '택배박스' },
-        { img: 'block_images/notebook1.PNG', scale: 0.8, hp: 30, name: '노트북' },
+        { img: 'block_images/notebook1.PNG', scale: 0.6, hp: 30, name: '노트북' },
     ],
 ];
 let currentLevel = 0;
@@ -314,10 +314,15 @@ function drawPaddle() {
     }
 }
 
-function showClearModal() {
-    $('.clear-score-btn').text(`점수: ${score}`);
-    $('#clear-modal').fadeIn(200);
-}
+// function showClearModal() {
+//     if (animationId) {
+//         cancelAnimationFrame(animationId);
+//         animationId = null;
+//     }
+//     clearInterval(timerInterval); // 타이머도 정지
+//     $('.clear-score-btn').text(`점수: ${score}`);
+//     $('#clear-modal').fadeIn(200);
+// }
 
 function collisionDetection() {
     for (let brick of bricks) {
@@ -523,10 +528,12 @@ function collisionDetection() {
                     setTimeout(() => {
                         console.log('1.5초간 기다립니다.');
                         isGameClear = true;
-                        showClearModal();
-                        cancelAnimationFrame(animationId);
+                        // showClearModal(); // 클리어 모달 띄움
+                        cancelAnimationFrame(animationId); // 애니메이션 중단
                         animationId = null;
-                        clearInterval(timerInterval);
+                        if (currentLevel === 2) {
+                            clearInterval(timerInterval); // 타이머도 정지 (stage2일 때만)
+                        }
                     }, 1500);
                 }
             }
@@ -536,11 +543,18 @@ function collisionDetection() {
 
 function isAllBricksCleared() {
     //모든 brick의 hp가 0이라면 true 반환
-    return bricks.every((brick) => brick.hp === 0);
+    return bricks.every((brick) => brick.status === 0 || brick.hp <= 0);
 }
 
 function draw() {
-    if (animationId) cancelAnimationFrame(animationId);
+    if (isGameClear || isGameOver) {
+        if (animationId) {
+            cancelAnimationFrame(animationId);
+            animationId = null;
+        }
+        return;
+    }
+    // if (animationId) cancelAnimationFrame(animationId);
     animationId = requestAnimationFrame(draw);
 
     if (isGameClear || isGameOver) return;

@@ -100,7 +100,7 @@ const levels = [
         { img: 'block_images/plate2_1.PNG', scale: 0.2, hp: 2, name: '그릇' },
         { img: 'block_images/frame1_1.PNG', scale: 0.4, hp: 2, name: '액자' },
         { img: 'block_images/box1_1.PNG', scale: 0.4, hp: 3, name: '택배박스' },
-        { img: 'block_images/notebook_1.PNG', scale: 0.2, hp: 30, name: '노트북' },
+        { img: 'block_images/notebook1.PNG', scale: 0.2, hp: 30, name: '노트북' },
     ],
 ];
 let currentLevel = 0;

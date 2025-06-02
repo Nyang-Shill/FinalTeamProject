@@ -2,7 +2,7 @@ $(document).ready(function () {
     // 저장된 테마 적용
     const selectedCatTheme = localStorage.getItem('selectedCatTheme');
     console.log('stage2에서 읽은 테마:', selectedCatTheme);
-    
+
     if (selectedCatTheme) {
         if (selectedCatTheme === 'cat1' || selectedCatTheme === 'cat2' || selectedCatTheme === 'cat3') {
             console.log('테마 적용:', selectedCatTheme);
@@ -56,7 +56,6 @@ $(document).ready(function () {
 
     // 스테이지 클리어 팝업 표시
     function showClearModal() {
-        $('.clear-score-btn').text(`점수: ${score}`);
         $('#clear-modal').fadeIn(200);
     }
 
@@ -82,11 +81,11 @@ $(document).ready(function () {
     }
 
     function setLevelAndStart() {
-        currentLevel = getStageLevelFromFilename();
-        brickTypes = levels[currentLevel];
-        bricks = []; // 벽돌 배열 초기화
-        grid = Array.from({ length: gridRows }, () => Array(gridCols).fill(0)); // 그리드 초기화
-        randomPlaceBricks();
+        if (typeof currentLevel !== 'undefined') {
+            currentLevel = getStageLevelFromFilename();
+            brickTypes = levels[currentLevel];
+            randomPlaceBricks();
+        }
         if (typeof startGame === 'function') startGame();
     }
 });
