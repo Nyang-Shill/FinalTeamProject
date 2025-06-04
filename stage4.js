@@ -15,6 +15,8 @@ let balls = [], bricks = [], particles = [];
 let lastSpawn = 0, maxBalls = 3;
 let gameStarted = false;
 let selectedCatTheme = null;
+let currentEndImageIndex = 1;
+const maxEndImageIndex = 4;
 
 let paddle = { x: 0, y: 0, width: 80, height: 80, angle: 0 };
 let cat = { x: 50, y: 50, size: 80 };
@@ -200,7 +202,6 @@ function startGame() {
         // 인트로 팝업 표시
         $('#intro-modal').fadeIn(200);
         
-
         // 타이머 시작
         const timerInterval = setInterval(() => {
             if (timeLeft > 0 && gameStarted) {
@@ -220,8 +221,17 @@ function startGame() {
             } else {
                 clearInterval(timerInterval);
                 if (gameStarted) {
-                    $('#clear-modal').fadeIn(200);
+                    // 게임 종료 시 게임 종료 팝업 표시
                     gameStarted = false;
+                    // 게임 종료 팝업 표시 전에 이미지 초기화
+                    $('#game-end-modal .intro-image').attr('src', 'scenes_images/stage4_end_1.png');
+                    // 게임 종료 팝업 표시
+                    $('#game-end-modal').fadeIn(200, function() {
+                        // 팝업이 표시된 후 화살표 상태 업데이트
+                        currentEndImageIndex = 1;
+                        updateEndArrows();
+                        console.log("게임 종료 팝업 표시됨 (시간 초과)");
+                    });
                 }
             }
         }, 1000);
@@ -232,7 +242,6 @@ function startGame() {
         console.error('게임 시작 에러:', error);
         gameStarted = false;
     }
-
 }
 
 // 게임 루프 함수
@@ -293,29 +302,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 
+// 게임 종료 이미지 변경 함수
+function changeEndImage(index) {
+    console.log("changeEndImage 호출됨, index:", index);
+    const endImage = $('#game-end-modal .intro-image');
+    endImage.fadeOut(200, function() {
+        endImage.attr('src', `scenes_images/stage4_end_${index}.png`);
+        endImage.fadeIn(200);
+        updateEndArrows();
+    });
+}
+
 // jQuery ready 이벤트
 $(document).ready(function() {
     console.log("jQuery ready");
     
-    // SKIP 버튼 클릭 이벤트
-    $('#skip-btn').click(function() {
-        $('#intro-modal').fadeOut(200);
-    });
-    
-    // 홈으로 버튼 클릭 이벤트
-    $('.clear-home-btn').click(function() {
-        window.location.href = 'home.html';
-    });
-    
-    // 점수 버튼 클릭 이벤트
-    $('.clear-score-btn').click(function() {
-        alert(`최종 점수: ${score}원`);
-    });
-     
-    //컷신추가!!
     // 현재 이미지 인덱스 관리
     let currentImageIndex = 1;
-    const maxImageIndex = 5;  // 최대 이미지 번호
+    const maxImageIndex = 5;  // 인트로 최대 이미지 번호
 
     // 화살표 표시/숨김 업데이트 함수
     function updateArrows() {
@@ -334,43 +338,73 @@ $(document).ready(function() {
         }
     }
 
+    // SKIP 버튼 클릭 이벤트
+    $('#skip-btn').click(function() {
+        console.log("SKIP 버튼 클릭됨");
+        if ($('#intro-modal').is(':visible')) {
+            $('#intro-modal').fadeOut(200, function() {
+                if (typeof startGame === 'function') startGame();
+            });
+        }
+    });
+
+    // 게임 종료 팝업의 SKIP/다음 버튼 클릭 이벤트
+    $(document).on('click', '#game-end-modal #skip-btn', function() {
+        console.log("게임 종료 팝업의 SKIP/다음 버튼 클릭됨");
+        $('#game-end-modal').fadeOut(200, function() {
+            console.log("게임 종료 팝업이 사라짐");
+            setTimeout(function() {
+                $('#clear-modal').fadeIn(200);
+                console.log("스테이지 클리어 팝업 표시됨");
+            }, 100);
+        });
+    });
+
+    // 오른쪽 화살표 클릭 이벤트
+    $(document).on('click', '.right-arrow', function() {
+        console.log("오른쪽 화살표 클릭됨");
+        if ($('#intro-modal').is(':visible')) {
+            if (currentImageIndex < maxImageIndex) {
+                currentImageIndex++;
+                changeImage(currentImageIndex);
+            }
+        } else if ($('#game-end-modal').is(':visible')) {
+            if (currentEndImageIndex < maxEndImageIndex) {
+                currentEndImageIndex++;
+                changeEndImage(currentEndImageIndex);
+            }
+        }
+    });
+
+    // 왼쪽 화살표 클릭 이벤트
+    $(document).on('click', '.left-arrow', function() {
+        console.log("왼쪽 화살표 클릭됨");
+        if ($('#intro-modal').is(':visible')) {
+            if (currentImageIndex > 1) {
+                currentImageIndex--;
+                changeImage(currentImageIndex);
+            }
+        } else if ($('#game-end-modal').is(':visible')) {
+            if (currentEndImageIndex > 1) {
+                currentEndImageIndex--;
+                changeEndImage(currentEndImageIndex);
+            }
+        }
+    });
+
     // 이미지 변경 함수
     function changeImage(index) {
         const introImage = $('.intro-image');
         introImage.fadeOut(200, function() {
             introImage.attr('src', `scenes_images/stage4_${index}.png`);
             introImage.fadeIn(200);
-            updateArrows();  // 이미지 변경 후 화살표 상태 업데이트
+            updateArrows();
         });
     }
 
-    // 오른쪽 화살표 클릭 이벤트
-    $('.right-arrow').click(function() {
-        if (currentImageIndex < maxImageIndex) {
-            currentImageIndex++;
-            changeImage(currentImageIndex);
-        }
-    });
-
-    // 왼쪽 화살표 클릭 이벤트
-    $('.left-arrow').click(function() {
-        if (currentImageIndex > 1) {
-            currentImageIndex--;
-            changeImage(currentImageIndex);
-        }
-    });
-
     // 인트로 팝업 자동 표시
     $('#intro-modal').fadeIn(200);
-    updateArrows();  // 초기 화살표 상태 설정
-
-    // SKIP/게임 시작 버튼 클릭 시 즉시 닫힘
-    $('#skip-btn').click(function () {
-        $('#intro-modal').fadeOut(200, function () {
-            if (typeof startGame === 'function') startGame();
-            startGameTimer();
-        });
-    });
+    updateArrows();
 });
 
 
@@ -637,9 +671,21 @@ function updateBalls() {
 // 게임 종료 체크 함수 추가
 function checkGameEnd() {
     if (bricks.length === 0) {
-        // 모든 벽돌이 깨졌을 때
-        gameStarted = false;
-        $('#clear-modal').fadeIn(200);
+        // 모든 벽돌이 깨졌을 때 1.5초 후에 게임 종료
+        setTimeout(() => {
+            if (gameStarted) {  // 게임이 아직 진행 중인지 확인
+                gameStarted = false;
+                // 게임 종료 팝업 표시 전에 이미지 초기화
+                $('#game-end-modal .intro-image').attr('src', 'scenes_images/stage4_end_1.png');
+                // 게임 종료 팝업 표시
+                $('#game-end-modal').fadeIn(200, function() {
+                    // 팝업이 표시된 후 화살표 상태 업데이트
+                    currentEndImageIndex = 1;
+                    updateEndArrows();
+                    console.log("게임 종료 팝업 표시됨 (벽돌 파괴)");
+                });
+            }
+        }, 1500);
     }
 }
 
@@ -654,5 +700,30 @@ function setupEventListeners() {
         paddle.angle = Math.atan2(dy, dx);
     });
 
+}
+
+// 게임 종료 화살표 표시/숨김 업데이트 함수
+function updateEndArrows() {
+    console.log("updateEndArrows 호출됨, currentEndImageIndex:", currentEndImageIndex);
+    const leftArrow = $('#game-end-modal .left-arrow');
+    const rightArrow = $('#game-end-modal .right-arrow');
+    const skipBtn = $('#game-end-modal #skip-btn');
+    
+    if (currentEndImageIndex === 1) {
+        leftArrow.css('visibility', 'hidden');
+        skipBtn.text('SKIP');
+    } else {
+        leftArrow.css('visibility', 'visible');
+    }
+
+    if (currentEndImageIndex === maxEndImageIndex) {
+        rightArrow.css('visibility', 'hidden');
+        skipBtn.text('다음');
+    } else {
+        rightArrow.css('visibility', 'visible');
+        if (currentEndImageIndex !== 1) {
+            skipBtn.text('SKIP');
+        }
+    }
 }
 
