@@ -17,6 +17,7 @@ let gameStarted = false;
 let selectedCatTheme = null;
 let currentEndImageIndex = 1;
 const maxEndImageIndex = 4;
+let backgroundImg = new Image(); // 배경 이미지 객체 추가
 
 let paddle = { x: 0, y: 0, width: 80, height: 80, angle: 0 };
 let cat = { x: 50, y: 50, size: 80 };
@@ -62,6 +63,13 @@ let catMoveInterval = 10000; // 10초
 let finalBallsCreated = false;
 let paddleRadius = 280; // 패들이 움직일 원의 반지름 (벽돌 배치 원보다 약간 더 크게)
 
+// 테마에 따른 배경 이미지 매핑
+const backgroundThemeMapping = {
+    'interior1': 'background1.png',
+    'interior2': 'background2.png',
+    'interior3': 'background3.png'
+};
+
 // 게임 초기화 함수
 function initGame() {
     console.log("게임 초기화 시작");
@@ -83,11 +91,34 @@ function initGame() {
     canvas.width = 800;
     canvas.height = 600;
     
+    // 캔버스 스타일 설정
+    canvas.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+    
     // 게임 변수 초기화
     centerX = canvas.width / 2;
     centerY = canvas.height / 2;
     score = 0;
     timeLeft = 30;
+    
+    // 선택된 테마에 따라 배경 이미지 설정
+    const selectedTheme = localStorage.getItem('selectedInteriorTheme');
+    console.log('선택된 인테리어 테마:', selectedTheme);
+    
+    if (selectedTheme && backgroundThemeMapping[selectedTheme]) {
+        const backgroundImageName = backgroundThemeMapping[selectedTheme];
+        document.body.style.backgroundImage = `url('./images/${backgroundImageName}')`;
+        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundPosition = 'center';
+        document.body.style.backgroundRepeat = 'no-repeat';
+        console.log("배경 이미지 설정:", backgroundImageName);
+    } else {
+        // 기본 배경 이미지 설정
+        document.body.style.backgroundImage = `url('./images/background1.png')`;
+        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundPosition = 'center';
+        document.body.style.backgroundRepeat = 'no-repeat';
+        console.log("기본 배경 이미지 설정: background1.png");
+    }
     
     // 이벤트 리스너 설정
     setupEventListeners();
@@ -249,7 +280,7 @@ function gameLoop() {
     if (!gameStarted) return;
     
     try {
-        // 화면 클리어
+        // 화면 클리어 (투명하게)
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         // 게임 요소 업데이트 및 그리기

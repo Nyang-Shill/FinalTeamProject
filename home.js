@@ -59,15 +59,26 @@ $(document).ready(function () {
 
     // 확인 버튼 클릭 시 모달 닫기
     $('#themeConfirmBtn').click(function () {
+        // 선택된 인테리어 테마 저장
+        const selectedInterior = $('.theme-section')
+            .find('.theme-title:contains("인테리어")')
+            .next()
+            .find('.theme-option.selected')
+            .data('theme');
+        console.log('선택된 인테리어 테마:', selectedInterior);
+        localStorage.setItem('selectedInteriorTheme', selectedInterior);
+        console.log('localStorage에 저장된 인테리어 테마:', localStorage.getItem('selectedInteriorTheme'));
+
         // 선택된 냥실이 테마 저장
         const selectedCat = $('.theme-section')
             .find('.theme-title:contains("냥실")')
             .next()
             .find('.theme-option.selected')
             .data('theme');
-        console.log('선택된 테마:', selectedCat); // 저장되는 값 확인
+        console.log('선택된 냥실이 테마:', selectedCat);
         localStorage.setItem('selectedCatTheme', selectedCat);
-        console.log('localStorage에 저장된 값:', localStorage.getItem('selectedCatTheme')); // 저장된 값 확인
+        console.log('localStorage에 저장된 냥실이 테마:', localStorage.getItem('selectedCatTheme'));
+
         $('#themeModal').fadeOut(300);
     });
 });
