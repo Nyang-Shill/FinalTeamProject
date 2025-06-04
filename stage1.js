@@ -16,6 +16,13 @@ $(document).ready(function () {
         'interior3': 'background3.png'
     };
 
+    // 테마에 따른 stage-title 색상 매핑
+    const titleColorMapping = {
+        'interior1': '#617131',
+        'interior2': '#878A37',
+        'interior3': '#AC9903'
+    };
+
     // 배경 이미지 설정
     const selectedTheme = localStorage.getItem('selectedInteriorTheme');
     console.log('선택된 인테리어 테마:', selectedTheme);
@@ -26,6 +33,11 @@ $(document).ready(function () {
         document.body.style.backgroundSize = 'cover';
         document.body.style.backgroundPosition = 'center';
         document.body.style.backgroundRepeat = 'no-repeat';
+        // stage-title 색상 설정
+        $('.stage-title').css({
+            'color': titleColorMapping[selectedTheme],
+            'border-color': titleColorMapping[selectedTheme]
+        });
         console.log("배경 이미지 설정:", backgroundImageName);
     } else {
         // 기본 배경 이미지 설정
@@ -33,6 +45,11 @@ $(document).ready(function () {
         document.body.style.backgroundSize = 'cover';
         document.body.style.backgroundPosition = 'center';
         document.body.style.backgroundRepeat = 'no-repeat';
+        // 기본 stage-title 색상 설정
+        $('.stage-title').css({
+            'color': '#617131',
+            'border-color': '#617131'
+        });
         console.log("기본 배경 이미지 설정: background1.png");
     }
 
