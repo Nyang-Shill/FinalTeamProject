@@ -1,101 +1,38 @@
-// $(document).ready(function () {
-//     // 저장된 테마 적용
-//     const selectedCatTheme = localStorage.getItem('selectedCatTheme');
-//     console.log('stage2에서 읽은 테마:', selectedCatTheme);
+// 전역 변수 선언
+let timeLeft = 30;
+let timerInterval = null;
 
-//     if (selectedCatTheme) {
-//         if (selectedCatTheme === 'cat1' || selectedCatTheme === 'cat2' || selectedCatTheme === 'cat3') {
-//             console.log('테마 적용:', selectedCatTheme);
-//             changeBallImage(selectedCatTheme);
-//         }
-//     }
-
-//     // 캔버스 안내 텍스트
-//     const canvas = document.getElementById('game-canvas');
-//     const ctx = canvas.getContext('2d');
-//     ctx.font = '32px sans-serif';
-//     ctx.fillStyle = '#888';
-//     ctx.textAlign = 'center';
-//     ctx.fillText('여기서 게임이 시작됩니다!', canvas.width / 2, canvas.height / 2);
-
-//     // 인트로 팝업 자동 표시
-//     $('#intro-modal').fadeIn(200);
-
-//     // 5초 후 자동 닫힘
-//     let introTimeout = setTimeout(function () {
-//         $('#intro-modal').fadeOut(200, function () {
-//             if (typeof setLevelAndStart === 'function') setLevelAndStart();
-//             startGameTimer();
-//         });
-//     }, 5000);
-
-//     // SKIP 버튼 클릭 시 즉시 닫힘
-//     $('#skip-btn').click(function () {
-//         $('#intro-modal').fadeOut(200, function () {
-//             if (typeof setLevelAndStart === 'function') setLevelAndStart();
-//             startGameTimer();
-//         });
-//         clearTimeout(introTimeout);
-//     });
-
-//     // 제한시간 타이머
-//     let timeLeft = 30;
-//     let timerInterval = null;
-
-//     function startGameTimer() {
-//         $('#time-remaining').text(timeLeft);
-//         timerInterval = setInterval(function () {
-//             timeLeft--;
-//             $('#time-remaining').text(timeLeft);
-//             if (timeLeft <= 0) {
-//                 clearInterval(timerInterval);
-//                 showClearModal();
-//             }
-//         }, 1000);
-//     }
-
-//     // 스테이지 클리어 팝업 표시
-//     function showClearModal() {
-//         $('#clear-modal').fadeIn(200);
-//     }
-
-//     // 팝업 버튼 동작 (예시)
-//     $('.clear-next-btn').click(function () {
-//         window.location.href = 'stage3.html';
-//     });
-//     $('.clear-home-btn').click(function () {
-//         window.location.href = 'home.html';
-//     });
-//     // 점수 버튼은 필요에 따라 동작 추가
-
-//     function getStageLevelFromFilename() {
-//         // 예: stage2.html, stage2.js → 2
-//         // location.pathname: /경로/stage2.html
-//         // 또는 현재 JS 파일명에서 추출
-//         const match = window.location.pathname.match(/stage(\d+)/);
-//         if (match) {
-//             // currentLevel은 0부터 시작이므로 -1
-//             return parseInt(match[1], 10) - 1;
-//         }
-//         return 0; // 기본값: 1스테이지
-//     }
-//     let gameInitialized = false;
-
-//     function setLevelAndStart() {
-//         if (gameInitialized) return;
-//         gameInitialized = true;
-//         if (typeof currentLevel !== 'undefined') {
-//             currentLevel = getStageLevelFromFilename();
-//             brickTypes = levels[currentLevel];
-//             randomPlaceBricks();
-//         }
-//         if (typeof startGame === 'function') startGame();
-//     }
-// });
 $(document).ready(function () {
+    // 테마에 따른 배경 이미지 매핑
+    const backgroundThemeMapping = {
+        'interior1': 'background1.png',
+        'interior2': 'background2.png',
+        'interior3': 'background3.png'
+    };
+
+    // 배경 이미지 설정
+    const selectedTheme = localStorage.getItem('selectedInteriorTheme');
+    console.log('선택된 인테리어 테마:', selectedTheme);
+    
+    if (selectedTheme && backgroundThemeMapping[selectedTheme]) {
+        const backgroundImageName = backgroundThemeMapping[selectedTheme];
+        document.body.style.backgroundImage = `url('./images/${backgroundImageName}')`;
+        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundPosition = 'center';
+        document.body.style.backgroundRepeat = 'no-repeat';
+        console.log("배경 이미지 설정:", backgroundImageName);
+    } else {
+        // 기본 배경 이미지 설정
+        document.body.style.backgroundImage = `url('./images/background1.png')`;
+        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundPosition = 'center';
+        document.body.style.backgroundRepeat = 'no-repeat';
+        console.log("기본 배경 이미지 설정: background1.png");
+    }
+
     // 저장된 테마 적용
     const selectedCatTheme = localStorage.getItem('selectedCatTheme');
-    console.log('stage2에서 읽은 테마:', selectedCatTheme);
+    console.log('stage3에서 읽은 테마:', selectedCatTheme);
 
     if (selectedCatTheme) {
         if (selectedCatTheme === 'cat1' || selectedCatTheme === 'cat2' || selectedCatTheme === 'cat3') {
@@ -132,21 +69,34 @@ $(document).ready(function () {
         clearTimeout(introTimeout);
     });
 
-    // 제한시간 타이머
-    let timeLeft = 10;
-    let timerInterval = null;
+    function getStageLevelFromFilename() {
+        const match = window.location.pathname.match(/stage(\d+)/);
+        if (match) {
+            return parseInt(match[1], 10) - 1;
+        }
+        return 0;
+    }
 
-    // function startGameTimer() {
-    //     $('#time-remaining').text(timeLeft);
-    //     timerInterval = setInterval(function () {
-    //         timeLeft--;
-    //         $('#time-remaining').text(timeLeft);
-    //         if (timeLeft <= 0) {
-    //             clearInterval(timerInterval);
-    //             showClearModal();
-    //         }
-    //     }, 1000);
-    // }
+    function setLevelAndStart() {
+        if (typeof currentLevel !== 'undefined') {
+            currentLevel = getStageLevelFromFilename();
+            brickTypes = levels[currentLevel];
+            randomPlaceBricks();
+        }
+        if (typeof startGame === 'function') startGame();
+    }
+
+    let currentImageIndex = 1;
+    const maxImageIndex = 2;
+
+    // 인트로 모달 표시
+    $('#intro-modal').show();
+    updateArrowVisibility();
+    updateSkipButton();
+
+    // 제한시간 타이머
+    let timeLeft = 30;
+    let timerInterval = null;
 
     function startGameTimer() {
         $('#time-remaining').text(timeLeft);
@@ -166,142 +116,108 @@ $(document).ready(function () {
         $('#clear-modal').fadeIn(200);
     }
 
-    // 팝업 버튼 동작 (예시)
+    // 팝업 버튼 동작
     $('.clear-next-btn').click(function () {
-        window.location.href = 'stage3.html';
+        window.location.href = 'stage4.html';
     });
     $('.clear-home-btn').click(function () {
         window.location.href = 'home.html';
     });
-    // 점수 버튼은 필요에 따라 동작 추가
 
-    function getStageLevelFromFilename() {
-        // 예: stage2.html, stage2.js → 2
-        // location.pathname: /경로/stage2.html
-        // 또는 현재 JS 파일명에서 추출
-        const match = window.location.pathname.match(/stage(\d+)/);
-        if (match) {
-            // currentLevel은 0부터 시작이므로 -1
-            return parseInt(match[1], 10) - 1;
+    // 왼쪽 화살표 클릭
+    $('.left-arrow').click(function() {
+        if (currentImageIndex > 1) {
+            currentImageIndex--;
+            updateImage();
+            updateArrowVisibility();
+            updateSkipButton();
         }
-        return 0; // 기본값: 1스테이지
-    }
-
-    function setLevelAndStart() {
-        if (typeof currentLevel !== 'undefined') {
-            currentLevel = getStageLevelFromFilename();
-            brickTypes = levels[currentLevel];
-            randomPlaceBricks();
+    });
+    
+    // 오른쪽 화살표 클릭
+    $('.right-arrow').click(function() {
+        if (currentImageIndex < maxImageIndex) {
+            currentImageIndex++;
+            updateImage();
+            updateArrowVisibility();
+            updateSkipButton();
         }
-        if (typeof startGame === 'function') startGame();
+    });
+    
+    // SKIP/게임시작 버튼 클릭
+    $('#skip-btn').click(function() {
+        $('#intro-modal').hide();
+        startGameTimer();
+    });
+    
+    // 이미지 업데이트 함수
+    function updateImage() {
+        $('.intro-image').attr('src', `scenes_images/stage3_${currentImageIndex}.png`);
     }
 
-  }
+    // 화살표 가시성 업데이트 함수
+    function updateArrowVisibility() {
+        if (currentImageIndex === 1) {
+            $('.left-arrow').css('visibility', 'hidden');
+        } else {
+            $('.left-arrow').css('visibility', 'visible');
+        }
 
-  // 캔버스 안내 텍스트
-  const canvas = document.getElementById('game-canvas');
-  const ctx = canvas.getContext('2d');
-  ctx.font = '32px sans-serif';
-  ctx.fillStyle = '#888';
-  ctx.textAlign = 'center';
-  ctx.fillText('여기서 게임이 시작됩니다!', canvas.width/2, canvas.height/2);
-
-  let currentImageIndex = 1;
-  const maxImageIndex = 2;
-
-  // 인트로 모달 표시
-  $('#intro-modal').show();
-  updateArrowVisibility();
-  updateSkipButton();
-
-  // 제한시간 타이머
-  let timeLeft = 30;
-  let timerInterval = null;
-
-  function startGameTimer() {
-    $('#time-remaining').text(timeLeft);
-    timerInterval = setInterval(function () {
-      timeLeft--;
-      $('#time-remaining').text(timeLeft);
-      if (timeLeft <= 0) {
-        clearInterval(timerInterval);
-        showClearModal();
-      }
-    }, 1000);
-  }
-
-  // 스테이지 클리어 팝업 표시
-  function showClearModal() {
-    $('#clear-modal').fadeIn(200);
-  }
-
-  // 팝업 버튼 동작
-  $('.clear-next-btn').click(function () {
-    window.location.href = 'stage4.html';
-  });
-  $('.clear-home-btn').click(function () {
-    window.location.href = 'home.html';
-  });
-  
-  // 왼쪽 화살표 클릭
-  $('.left-arrow').click(function() {
-    if (currentImageIndex > 1) {
-      currentImageIndex--;
-      updateImage();
-      updateArrowVisibility();
-      updateSkipButton();
-    }
-  });
-  
-  // 오른쪽 화살표 클릭
-  $('.right-arrow').click(function() {
-    if (currentImageIndex < maxImageIndex) {
-      currentImageIndex++;
-      updateImage();
-      updateArrowVisibility();
-      updateSkipButton();
-    }
-  });
-  
-  // SKIP/게임시작 버튼 클릭
-  $('#skip-btn').click(function() {
-    $('#intro-modal').hide();
-    startGameTimer();
-  });
-  
-  // 이미지 업데이트 함수
-  function updateImage() {
-    $('.intro-image').attr('src', `scenes_images/stage3_${currentImageIndex}.png`);
-  }
-
-  // 화살표 가시성 업데이트 함수
-  function updateArrowVisibility() {
-    if (currentImageIndex === 1) {
-      $('.left-arrow').css('visibility', 'hidden');
-    } else {
-      $('.left-arrow').css('visibility', 'visible');
+        if (currentImageIndex === maxImageIndex) {
+            $('.right-arrow').css('visibility', 'hidden');
+        } else {
+            $('.right-arrow').css('visibility', 'visible');
+        }
     }
 
-    if (currentImageIndex === maxImageIndex) {
-      $('.right-arrow').css('visibility', 'hidden');
-    } else {
-      $('.right-arrow').css('visibility', 'visible');
+    // SKIP/게임시작 버튼 업데이트 함수
+    function updateSkipButton() {
+        if (currentImageIndex === maxImageIndex) {
+            $('#skip-btn').text('게임시작');
+        } else {
+            $('#skip-btn').text('SKIP');
+        }
     }
-  }
-
-  // SKIP/게임시작 버튼 업데이트 함수
-  function updateSkipButton() {
-    if (currentImageIndex === maxImageIndex) {
-      $('#skip-btn').text('게임시작');
-    } else {
-      $('#skip-btn').text('SKIP');
-    }
-  }
-
 });
 
 // 게임 시작 함수
 function startGame() {
-  // 게임 시작 로직
-  console.log('Game started');
+    console.log('Game started');
+}
+
+// 게임 초기화 함수
+function initGame() {
+    console.log("게임 초기화 시작");
+    
+    // 캔버스 초기화
+    canvas = document.getElementById('game-canvas');
+    if (!canvas) {
+        console.error('Canvas element not found!');
+        return;
+    }
+    
+    ctx = canvas.getContext('2d');
+    if (!ctx) {
+        console.error('Could not get canvas context!');
+        return;
+    }
+    
+    // 캔버스 크기 설정
+    canvas.width = 800;
+    canvas.height = 600;
+    
+    // 캔버스 스타일 설정
+    canvas.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+    
+    // 게임 변수 초기화
+    centerX = canvas.width / 2;
+    centerY = canvas.height / 2;
+    score = 0;
+    timeLeft = 30;
+    
+    // 이벤트 리스너 설정
+    setupEventListeners();
+    
+    // 이미지 초기화
+    initImages();
 }

@@ -1,4 +1,31 @@
 $(document).ready(function () {
+    // 테마에 따른 배경 이미지 매핑
+    const backgroundThemeMapping = {
+        'interior1': 'background1.png',
+        'interior2': 'background2.png',
+        'interior3': 'background3.png'
+    };
+
+    // 배경 이미지 설정
+    const selectedTheme = localStorage.getItem('selectedInteriorTheme');
+    console.log('선택된 인테리어 테마:', selectedTheme);
+    
+    if (selectedTheme && backgroundThemeMapping[selectedTheme]) {
+        const backgroundImageName = backgroundThemeMapping[selectedTheme];
+        document.body.style.backgroundImage = `url('./images/${backgroundImageName}')`;
+        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundPosition = 'center';
+        document.body.style.backgroundRepeat = 'no-repeat';
+        console.log("배경 이미지 설정:", backgroundImageName);
+    } else {
+        // 기본 배경 이미지 설정
+        document.body.style.backgroundImage = `url('./images/background1.png')`;
+        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundPosition = 'center';
+        document.body.style.backgroundRepeat = 'no-repeat';
+        console.log("기본 배경 이미지 설정: background1.png");
+    }
+
     // 저장된 테마 적용
     const selectedCatTheme = localStorage.getItem('selectedCatTheme');
     console.log('stage2에서 읽은 테마:', selectedCatTheme);
@@ -100,6 +127,7 @@ $(document).ready(function () {
         if (typeof stopGame === 'function') {
             stopGame();
         }
+        $('.clear-score-btn').text(`점수: ${score}`);
         $('#clear-modal').fadeIn(200);
     }
 
@@ -128,5 +156,42 @@ $(document).ready(function () {
         randomPlaceBricks();
 
         if (typeof startGame === 'function') startGame();
+    }
+
+    // 게임 초기화 함수
+    function initGame() {
+        console.log("게임 초기화 시작");
+        
+        // 캔버스 초기화
+        canvas = document.getElementById('game-canvas');
+        if (!canvas) {
+            console.error('Canvas element not found!');
+            return;
+        }
+        
+        ctx = canvas.getContext('2d');
+        if (!ctx) {
+            console.error('Could not get canvas context!');
+            return;
+        }
+        
+        // 캔버스 크기 설정
+        canvas.width = 800;
+        canvas.height = 600;
+        
+        // 캔버스 스타일 설정
+        canvas.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+        
+        // 게임 변수 초기화
+        centerX = canvas.width / 2;
+        centerY = canvas.height / 2;
+        score = 0;
+        timeLeft = 30;
+        
+        // 이벤트 리스너 설정
+        setupEventListeners();
+        
+        // 이미지 초기화
+        initImages();
     }
 });
