@@ -87,6 +87,9 @@ $(document).ready(function () {
             $('#time-remaining').text(timeLeft);
             if (timeLeft <= 0) {
                 clearInterval(timerInterval);
+                isGameClear = true;
+                cancelAnimationFrame(animationId);
+                animationId = null;
                 showClearModal();
             }
         }, 1000);
@@ -94,6 +97,9 @@ $(document).ready(function () {
 
     // 스테이지 클리어 팝업 표시
     function showClearModal() {
+        if (typeof stopGame === 'function') {
+            stopGame();
+        }
         $('#clear-modal').fadeIn(200);
     }
 
