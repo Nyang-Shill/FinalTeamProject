@@ -94,9 +94,10 @@ button:hover {
 
 .modal-title {
     text-align: center;
-    font-size: 24px;
+    font-size: 40px;
     margin-bottom: 20px;
-    color: #333;
+    font-weight: bold;
+    color: #efab6a;
 }
 
 .theme-section {
@@ -205,6 +206,8 @@ button:hover {
 }
 
 #themeConfirmBtn {
+    color: #fff;
+    background-color: #71adfa;
     margin-top: 28px;
     font-size: 24px;
     padding: 12px 38px;
@@ -212,6 +215,12 @@ button:hover {
     display: block;
     margin-left: auto;
     margin-right: auto;
+}
+
+#themeConfirmBtn:hover {
+    border: 2px solid #5b7fe7;
+    background-color: #fff;
+    color: #71adfa;
 }
 
 #themeConfirmBtn:disabled {

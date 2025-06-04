@@ -472,7 +472,7 @@ function collisionDetection() {
                         if (found) maxHp = found.hp;
                     }
                     score += maxHp;
-                    $('#score-box').text(score);
+                    $('#score-box').text('점수: ' + score);
                 }
 
                 // 모든 벽돌이 깨졌을 때 게임 클리어 처리
@@ -516,6 +516,11 @@ function draw() {
         ctx.strokeStyle = '#FFD700';  // 노란색
         ctx.lineWidth = 5;
         ctx.strokeRect(0, 0, canvas.width, canvas.height);
+        // 빛나는 효과를 위한 box-shadow 추가
+        canvas.style.boxShadow = '0 0 20px #FFD700, 0 0 40px rgba(255, 215, 0, 0.5)';
+    } else {
+        // 파워업이 아닐 때는 box-shadow 제거
+        canvas.style.boxShadow = 'none';
     }
     
 
