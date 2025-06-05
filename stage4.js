@@ -1,3 +1,62 @@
+$(document).ready(function () {
+  // 저장된 테마 적용
+  const selectedCatTheme = localStorage.getItem('selectedCatTheme');
+  console.log('stage4에서 읽은 테마:', selectedCatTheme);
+  
+  if (selectedCatTheme) {
+    if (selectedCatTheme === 'cat1' || selectedCatTheme === 'cat2' || selectedCatTheme === 'cat3') {
+      console.log('테마 적용:', selectedCatTheme);
+      changeBallImage(selectedCatTheme);
+    }
+  }
+
+// 테마에 따른 고양이 이미지 매핑
+const catThemeMapping = {
+    'cat1': 'cat2.jpg',
+    'cat2': 'cat1.jpg',
+    'cat3': 'cat3.jpg'
+};
+
+// 테마에 따른 공 이미지 매핑
+const ballThemeMapping = {
+    'cat1': 1,
+    'cat2': 2,
+    'cat3': 3
+};
+
+
+  // 인트로 팝업 자동 표시
+  $('#intro-modal').fadeIn(200);
+
+  // 5초 후 자동 닫힘
+  let introTimeout = setTimeout(function () {
+    $('#intro-modal').fadeOut(200, startGameTimer);
+  }, 5000);
+
+  // SKIP 버튼 클릭 시 즉시 닫힘
+  $('#skip-btn').click(function () {
+    $('#intro-modal').fadeOut(200, startGameTimer);
+    clearTimeout(introTimeout);
+  });
+
+  // 제한시간 타이머
+  let timeLeft = 30;
+  let timerInterval = null;
+
+
+  function startGameTimer() {
+    $('#time-remaining').text(timeLeft);
+    timerInterval = setInterval(function () {
+      timeLeft--;
+      $('#time-remaining').text(timeLeft);
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        showClearModal();
+      }
+    }, 1000);
+  }
+
+
 console.log("stage4.js 파일 로드됨");
 
 // jQuery가 로드되었는지 확인
@@ -167,13 +226,17 @@ function initImages() {
     }
     
     // 선택된 테마 가져오기
-    const selectedTheme = localStorage.getItem('selectedCatTheme') || 'select_cat1.jpg';
+    const selectedTheme = localStorage.getItem('selectedCatTheme') || 'cat1';
+    console.log('선택된 고양이 테마:', selectedTheme);
+
     
     // 고양이 이미지 로드 (테마에 따라)
     const catImageName = catThemeMapping[selectedTheme] || 'cat2.jpg';
     catImg.onload = checkImagesLoaded;
     catImg.onerror = () => handleImageError(catImg, "고양이");
     catImg.src = `./images/${catImageName}`;
+    console.log('로드할 고양이 이미지:', catImg.src);
+
     
     // 패들 이미지 로드 (hand.PNG)
     handImg.onload = checkImagesLoaded;
@@ -181,18 +244,17 @@ function initImages() {
     handImg.src = "./images/hand.PNG";
     
     // 공 이미지 로드 (선택된 테마에 따라 하나의 공 이미지만 사용)
-    let ballImageIndex = 1; // 기본값
-    if (selectedTheme === 'select_cat2.jpg') {
-        ballImageIndex = 2;
-    } else if (selectedTheme === 'select_cat3.jpg') {
-        ballImageIndex = 3;
-    }
+    const ballImageIndex = ballThemeMapping[selectedTheme] || 1;
+    console.log('선택된 공 이미지 인덱스:', ballImageIndex);
+
     
     const ballImg = new Image();
     ballImg.onload = checkImagesLoaded;
     ballImg.onerror = () => handleImageError(ballImg, "공");
     ballImg.src = `./ball_images/ball${ballImageIndex}.PNG`;
-    ballImages = [ballImg]; // 하나의 공 이미지만 사용
+    console.log('로드할 공 이미지:', ballImg.src);
+    ballImages = [ballImg];
+
     
     // 벽돌 이미지 로드
     Object.entries(brickTypes).forEach(([type, data]) => {
@@ -215,6 +277,21 @@ function initImages() {
     // 전체 이미지 수 계산
     totalImages = 2 + ballImages.length + Object.values(brickTypes).reduce((sum, type) => sum + type.images.length, 0);
 }
+
+
+  // 스테이지 클리어 팝업 표시
+  function showClearModal() {
+    $('#clear-modal').fadeIn(200);
+  }
+
+  // 팝업 버튼 동작 (예시)
+  $('.clear-next-btn').click(function () {
+    window.location.href = 'stage2.html';
+  });
+  $('.clear-home-btn').click(function () {
+    window.location.href = 'home.html';
+  });
+  // 점수 버튼은 필요에 따라 동작 추가
 
 // 게임 시작 함수
 function startGame() {
@@ -766,4 +843,3 @@ function updateEndArrows() {
         }
     }
 }
-
