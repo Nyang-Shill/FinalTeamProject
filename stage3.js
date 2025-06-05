@@ -1,6 +1,11 @@
 // 전역 변수 선언
 let timeLeft = 30;
 let timerInterval = null;
+let currentEndImageIndex = 1;
+const maxEndImageIndex = 6;
+let isGameEndModalShown = false;
+let currentImageIndex = 1;
+const maxImageIndex = 2;
 
 $(document).ready(function () {
     // 테마에 따른 배경 이미지 매핑
@@ -69,21 +74,14 @@ $(document).ready(function () {
     // 인트로 팝업 자동 표시
     $('#intro-modal').fadeIn(200);
 
-    // 5초 후 자동 닫힘
-    let introTimeout = setTimeout(function () {
-        $('#intro-modal').fadeOut(200, function () {
-            if (typeof setLevelAndStart === 'function') setLevelAndStart();
-            startGameTimer();
-        });
-    }, 5000);
-
     // SKIP 버튼 클릭 시 즉시 닫힘
     $('#skip-btn').click(function () {
-        $('#intro-modal').fadeOut(200, function () {
-            if (typeof setLevelAndStart === 'function') setLevelAndStart();
-            startGameTimer();
-        });
-        clearTimeout(introTimeout);
+        if ($('#intro-modal').is(':visible')) {
+            $('#intro-modal').fadeOut(200, function () {
+                if (typeof setLevelAndStart === 'function') setLevelAndStart();
+                startGameTimer();
+            });
+        }
     });
 
     function getStageLevelFromFilename() {
@@ -103,17 +101,121 @@ $(document).ready(function () {
         if (typeof startGame === 'function') startGame();
     }
 
-    let currentImageIndex = 1;
-    const maxImageIndex = 2;
-
     // 인트로 모달 표시
     $('#intro-modal').show();
-    updateArrowVisibility();
-    updateSkipButton();
+    updateIntroArrows();
+    updateIntroSkipButton();
 
-    // 제한시간 타이머
-    let timeLeft = 30;
-    let timerInterval = null;
+    // 게임 시작 관련 함수들
+    function updateIntroImage() {
+        const introImage = $('#intro-modal .intro-image');
+        introImage.fadeOut(200, function() {
+            introImage.attr('src', `scenes_images/stage3_${currentImageIndex}.png`);
+            introImage.fadeIn(200);
+            updateIntroArrows();
+            updateIntroSkipButton();
+        });
+    }
+
+    function updateIntroArrows() {
+        if (currentImageIndex === 1) {
+            $('#intro-modal .left-arrow').css('visibility', 'hidden');
+        } else {
+            $('#intro-modal .left-arrow').css('visibility', 'visible');
+        }
+
+        if (currentImageIndex === maxImageIndex) {
+            $('#intro-modal .right-arrow').css('visibility', 'hidden');
+            $('#intro-modal #skip-btn').text('게임 시작');
+        } else {
+            $('#intro-modal .right-arrow').css('visibility', 'visible');
+            $('#intro-modal #skip-btn').text('SKIP');
+        }
+    }
+
+    function updateIntroSkipButton() {
+        if (currentImageIndex === maxImageIndex) {
+            $('#intro-modal #skip-btn').text('게임 시작');
+        } else {
+            $('#intro-modal #skip-btn').text('SKIP');
+        }
+    }
+
+    // 게임 시작 화살표 클릭 이벤트
+    $('#intro-modal .left-arrow').click(function() {
+        if (currentImageIndex > 1) {
+            currentImageIndex--;
+            updateIntroImage();
+        }
+    });
+
+    $('#intro-modal .right-arrow').click(function() {
+        if (currentImageIndex < maxImageIndex) {
+            currentImageIndex++;
+            updateIntroImage();
+        }
+    });
+
+    // 게임 시작 SKIP 버튼 클릭
+    $('#intro-modal #skip-btn').click(function() {
+        $('#intro-modal').fadeOut(200, function() {
+            if (typeof setLevelAndStart === 'function') setLevelAndStart();
+            startGameTimer();
+        });
+    });
+
+    // 게임 종료 관련 함수들
+    function updateEndImage() {
+        const endImage = $('#game-end-modal .intro-image');
+        endImage.fadeOut(200, function() {
+            endImage.attr('src', `scenes_images/stage3_end_${currentEndImageIndex}.png`);
+            endImage.fadeIn(200);
+            updateEndArrows();
+        });
+    }
+
+    function updateEndArrows() {
+        if (currentEndImageIndex === 1) {
+            $('#game-end-modal .left-arrow').css('visibility', 'hidden');
+            $('#game-end-modal #skip-btn').text('SKIP');
+        } else {
+            $('#game-end-modal .left-arrow').css('visibility', 'visible');
+        }
+
+        if (currentEndImageIndex === maxEndImageIndex) {
+            $('#game-end-modal .right-arrow').css('visibility', 'hidden');
+            $('#game-end-modal #skip-btn').text('다음');
+        } else {
+            $('#game-end-modal .right-arrow').css('visibility', 'visible');
+            if (currentEndImageIndex !== 1) {
+                $('#game-end-modal #skip-btn').text('SKIP');
+            }
+        }
+    }
+
+    // 게임 종료 화살표 클릭 이벤트
+    $('#game-end-modal .left-arrow').click(function() {
+        if (currentEndImageIndex > 1) {
+            currentEndImageIndex--;
+            updateEndImage();
+        }
+    });
+
+    $('#game-end-modal .right-arrow').click(function() {
+        if (currentEndImageIndex < maxEndImageIndex) {
+            currentEndImageIndex++;
+            updateEndImage();
+        }
+    });
+
+    // 게임 종료 SKIP/다음 버튼 클릭
+    $('#game-end-modal #skip-btn').click(function() {
+        $('#game-end-modal').fadeOut(200, function() {
+            setTimeout(function() {
+                $('#clear-modal').fadeIn(200);
+            }, 100);
+        });
+    });
 
     function startGameTimer() {
         $('#time-remaining').text(timeLeft);
@@ -122,9 +224,31 @@ $(document).ready(function () {
             $('#time-remaining').text(timeLeft);
             if (timeLeft <= 0) {
                 clearInterval(timerInterval);
-                showClearModal();
+                if (!isGameEndModalShown) {
+                    isGameEndModalShown = true;
+                    $('#intro-modal').hide();
+                    currentEndImageIndex = 1;
+                    updateEndImage();
+                    updateEndArrows();
+                    $('#game-end-modal').fadeIn(200);
+                }
             }
         }, 1000);
+    }
+
+    function checkGameEnd() {
+        if (bricks.length === 0) {
+            setTimeout(() => {
+                if (!isGameEndModalShown) {
+                    isGameEndModalShown = true;
+                    $('#intro-modal').hide();
+                    currentEndImageIndex = 1;
+                    updateEndImage();
+                    updateEndArrows();
+                    $('#game-end-modal').fadeIn(200);
+                }
+            }, 1500);
+        }
     }
 
     // 스테이지 클리어 팝업 표시
@@ -140,61 +264,6 @@ $(document).ready(function () {
     $('.clear-home-btn').click(function () {
         window.location.href = 'home.html';
     });
-
-    // 왼쪽 화살표 클릭
-    $('.left-arrow').click(function() {
-        if (currentImageIndex > 1) {
-            currentImageIndex--;
-            updateImage();
-            updateArrowVisibility();
-            updateSkipButton();
-        }
-    });
-    
-    // 오른쪽 화살표 클릭
-    $('.right-arrow').click(function() {
-        if (currentImageIndex < maxImageIndex) {
-            currentImageIndex++;
-            updateImage();
-            updateArrowVisibility();
-            updateSkipButton();
-        }
-    });
-    
-    // SKIP/게임시작 버튼 클릭
-    $('#skip-btn').click(function() {
-        $('#intro-modal').hide();
-        startGameTimer();
-    });
-    
-    // 이미지 업데이트 함수
-    function updateImage() {
-        $('.intro-image').attr('src', `scenes_images/stage3_${currentImageIndex}.png`);
-    }
-
-    // 화살표 가시성 업데이트 함수
-    function updateArrowVisibility() {
-        if (currentImageIndex === 1) {
-            $('.left-arrow').css('visibility', 'hidden');
-        } else {
-            $('.left-arrow').css('visibility', 'visible');
-        }
-
-        if (currentImageIndex === maxImageIndex) {
-            $('.right-arrow').css('visibility', 'hidden');
-        } else {
-            $('.right-arrow').css('visibility', 'visible');
-        }
-    }
-
-    // SKIP/게임시작 버튼 업데이트 함수
-    function updateSkipButton() {
-        if (currentImageIndex === maxImageIndex) {
-            $('#skip-btn').text('게임시작');
-        } else {
-            $('#skip-btn').text('SKIP');
-        }
-    }
 });
 
 // 게임 시작 함수
