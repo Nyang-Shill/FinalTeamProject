@@ -117,19 +117,16 @@ function initGame() {
         document.body.style.backgroundSize = 'cover';
         document.body.style.backgroundPosition = 'center';
         document.body.style.backgroundRepeat = 'no-repeat';
-        // stage-title 색상 설정
         $('.stage-title').css({
             'color': titleColorMapping[selectedTheme],
             'border-color': titleColorMapping[selectedTheme]
         });
         console.log("배경 이미지 설정:", backgroundImageName);
     } else {
-        // 기본 배경 이미지 설정
         document.body.style.backgroundImage = `url('./images/background1.png')`;
         document.body.style.backgroundSize = 'cover';
         document.body.style.backgroundPosition = 'center';
         document.body.style.backgroundRepeat = 'no-repeat';
-        // 기본 stage-title 색상 설정
         $('.stage-title').css({
             'color': '#617131',
             'border-color': '#617131'
@@ -139,16 +136,12 @@ function initGame() {
     
     // 이벤트 리스너 설정
     setupEventListeners();
-    
-    // 이미지 초기화
-    initImages();
 }
 
 // 이미지 초기화 함수
 function initImages() {
     console.log("이미지 초기화 시작");
     
-    // 이미지 객체 생성
     catImg = new Image();
     handImg = new Image();
     ballImages = [];
@@ -163,7 +156,7 @@ function initImages() {
         console.log(`이미지 로드 진행: ${imagesLoaded}/${totalImages}`);
         if (imagesLoaded + imagesFailed >= totalImages) {
             console.log("모든 이미지 로드 완료");
-            startGame();
+            // 이미지 로드 완료 후에도 자동으로 게임을 시작하지 않음
         }
     }
     
@@ -225,12 +218,15 @@ function initImages() {
 
 // 게임 시작 함수
 function startGame() {
-    console.log("게임 시작");
-    if (gameStarted) return;
-    gameStarted = true;
+    console.log("게임 시작 함수 호출됨");
+    if (gameStarted) {
+        console.log("이미 게임이 시작되어 있음");
+        return;
+    }
     
     try {
         // 게임 상태 초기화
+        gameStarted = true;
         score = 0;
         timeLeft = 30;
         balls = [];
@@ -238,17 +234,14 @@ function startGame() {
         lastCatMove = Date.now();
         finalBallsCreated = false;
         
-        // 고양이 초기 위치 설정 (왼쪽 또는 오른쪽에서 시작)
-        const isLeftSide = Math.random() < 0.5; // 50% 확률로 왼쪽/오른쪽 결정
+        // 고양이 초기 위치 설정
+        const isLeftSide = Math.random() < 0.5;
         cat.x = isLeftSide ? 50 : canvas.width - cat.size - 50;
-        cat.y = Math.random() * (canvas.height - cat.size - 100) + 50; // 50px 마진
+        cat.y = Math.random() * (canvas.height - cat.size - 100) + 50;
         
         // 게임 요소 생성
         createBricks();
         createBall();
-        
-        // 인트로 팝업 표시
-        $('#intro-modal').fadeIn(200);
         
         // 타이머 시작
         const timerInterval = setInterval(() => {
@@ -256,11 +249,8 @@ function startGame() {
                 timeLeft--;
                 $('#time-remaining').text(timeLeft);
                 
-                // 마지막 10초에 3개의 공 생성
                 if (timeLeft === 10 && !finalBallsCreated) {
-                    // 기존 공 제거
                     balls = [];
-                    // 3개의 새로운 공 생성
                     for (let i = 0; i < 3; i++) {
                         createBall();
                     }
@@ -269,13 +259,9 @@ function startGame() {
             } else {
                 clearInterval(timerInterval);
                 if (gameStarted) {
-                    // 게임 종료 시 게임 종료 팝업 표시
                     gameStarted = false;
-                    // 게임 종료 팝업 표시 전에 이미지 초기화
                     $('#game-end-modal .intro-image').attr('src', 'scenes_images/stage4_end_1.png');
-                    // 게임 종료 팝업 표시
                     $('#game-end-modal').fadeIn(200, function() {
-                        // 팝업이 표시된 후 화살표 상태 업데이트
                         currentEndImageIndex = 1;
                         updateEndArrows();
                         console.log("게임 종료 팝업 표시됨 (시간 초과)");
@@ -286,6 +272,7 @@ function startGame() {
         
         // 게임 루프 시작
         requestAnimationFrame(gameLoop);
+        console.log("게임 루프 시작됨");
     } catch (error) {
         console.error('게임 시작 에러:', error);
         gameStarted = false;
@@ -342,12 +329,11 @@ function gameLoop() {
     }
 }
 
-
 // DOM이 로드되면 게임 초기화
 document.addEventListener('DOMContentLoaded', function() {
     console.log("DOM 로드 완료");
+    // 게임 초기화만 하고 자동 시작하지 않음
     initGame();
-
 });
 
 // 게임 종료 이미지 변경 함수
@@ -386,13 +372,21 @@ $(document).ready(function() {
         }
     }
 
-    // SKIP 버튼 클릭 이벤트
+    // SKIP/게임 시작 버튼 클릭 이벤트
     $('#skip-btn').click(function() {
-        console.log("SKIP 버튼 클릭됨");
+        console.log("SKIP/게임 시작 버튼 클릭됨");
         if ($('#intro-modal').is(':visible')) {
-            $('#intro-modal').fadeOut(200, function() {
-                if (typeof startGame === 'function') startGame();
-            });
+            if (currentImageIndex === maxImageIndex && $(this).text() === '게임 시작') {
+                // 마지막 이미지에서 '게임 시작' 버튼을 클릭했을 때만 게임 시작
+                $('#intro-modal').fadeOut(200, function() {
+                    console.log("인트로 모달 닫힘, 게임 시작 호출");
+                    startGame();
+                });
+            } else {
+                // 마지막 이미지가 아니거나 SKIP 버튼일 때는 마지막 이미지로 이동
+                currentImageIndex = maxImageIndex;
+                changeImage(currentImageIndex);
+            }
         }
     });
 
@@ -453,8 +447,10 @@ $(document).ready(function() {
     // 인트로 팝업 자동 표시
     $('#intro-modal').fadeIn(200);
     updateArrows();
-});
 
+    // 이미지 초기화는 하되 게임은 시작하지 않음
+    initImages();
+});
 
 console.log("JS 파일 로드됨");
 
@@ -650,61 +646,58 @@ function updateBalls() {
                 if (brick.name === '유리컵' && !brick.isBreaking) {
                     brick.hp--;
                     brick.isBreaking = true;
-                    score += 500;
+                    score += 100;  // 유리컵 hit price
                     
                     // 0.3초 후 벽돌 제거
                     brick.breakTimer = setTimeout(() => {
                         const index = bricks.indexOf(brick);
                         if (index > -1) {
                             bricks.splice(index, 1);
-                            score += 500;
+                            score += 100;  // 유리컵 break bonus
                             checkGameEnd();
                         }
                     }, brickTypes['유리컵'].breakDelay);
                 } else if (brick.name === '액자') {
                     brick.hitCount++;
-                    score += 500;
+                    score += 300;  // 액자 hit price
                     
                     if (brick.hitCount >= 2 && !brick.isBreaking) {
                         brick.isBreaking = true;
-                        // 0.3초 후 벽돌 제거
                         brick.breakTimer = setTimeout(() => {
                             const index = bricks.indexOf(brick);
                             if (index > -1) {
                                 bricks.splice(index, 1);
-                                score += 500;
+                                score += 300;  // 액자 break bonus
                                 checkGameEnd();
                             }
                         }, brickTypes['액자'].breakDelay);
                     }
                 } else if (brick.name === '택배상자') {
                     brick.hitCount++;
-                    score += 500;
+                    score += 500;  // 택배상자 hit price
                     
                     if (brick.hitCount >= 2 && !brick.isBreaking) {
                         brick.isBreaking = true;
-                        // 0.3초 후 벽돌 제거
                         brick.breakTimer = setTimeout(() => {
                             const index = bricks.indexOf(brick);
                             if (index > -1) {
                                 bricks.splice(index, 1);
-                                score += 500;
+                                score += 500;  // 택배상자 break bonus
                                 checkGameEnd();
                             }
                         }, brickTypes['택배상자'].breakDelay);
                     }
                 } else if (brick.name === '접시') {
                     brick.hitCount++;
-                    score += 500;
+                    score += 200;  // 접시 hit price
                     
                     if (brick.hitCount >= 2 && !brick.isBreaking) {
                         brick.isBreaking = true;
-                        // 0.3초 후 벽돌 제거
                         brick.breakTimer = setTimeout(() => {
                             const index = bricks.indexOf(brick);
                             if (index > -1) {
                                 bricks.splice(index, 1);
-                                score += 500;
+                                score += 200;  // 접시 break bonus
                                 checkGameEnd();
                             }
                         }, brickTypes['접시'].breakDelay);
@@ -747,7 +740,6 @@ function setupEventListeners() {
         const dy = e.clientY - rect.top - centerY;
         paddle.angle = Math.atan2(dy, dx);
     });
-
 }
 
 // 게임 종료 화살표 표시/숨김 업데이트 함수
