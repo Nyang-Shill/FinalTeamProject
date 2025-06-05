@@ -69,11 +69,10 @@ if (typeof jQuery === 'undefined') {
 // 전역 변수 선언
 let canvas, ctx;
 let catImg, handImg, ballImages, brickImages;
-let centerX, centerY, score, timeLeft;
+let centerX, centerY, score;
 let balls = [], bricks = [], particles = [];
 let lastSpawn = 0, maxBalls = 3;
 let gameStarted = false;
-let selectedCatTheme = null;
 let currentEndImageIndex = 1;
 const maxEndImageIndex = 4;
 let backgroundImg = new Image(); // 배경 이미지 객체 추가
@@ -107,13 +106,6 @@ const brickTypes = {
         height: 100, // 택배상자 크기 증가
         breakDelay: 300 // 0.3초
     }
-};
-
-// 테마에 따른 고양이 이미지 매핑
-const catThemeMapping = {
-    'select_cat1.jpg': 'cat2.jpg',
-    'select_cat2.jpg': 'cat1.jpg',
-    'select_cat3.jpg': 'cat3.jpg'
 };
 
 // 전역 변수 추가
@@ -843,3 +835,4 @@ function updateEndArrows() {
         }
     }
 }
+})
