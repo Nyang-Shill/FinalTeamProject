@@ -21,11 +21,6 @@ let score = 0;
 let animationId = null;
 let isPowerUp = false;
 let powerUpTimeout = null;
-let handX = 0;
-let handDirection = 1;  // 1: 오른쪽, -1: 왼쪽
-let handSpeed = 2;  // 이동 속도
-const handImage = new Image();
-handImage.src = 'images/hand.png';
 
 // 공 이미지 관리
 const ballImages = {
@@ -105,7 +100,7 @@ const levels = [
         { img: 'block_images/plate2_1.PNG', scale: 0.2, hp: 2, name: '그릇' },
         { img: 'block_images/frame1_1.PNG', scale: 0.4, hp: 2, name: '액자' },
         { img: 'block_images/box1_1.PNG', scale: 0.4, hp: 3, name: '택배박스' },
-        { img: 'block_images/notebook1.PNG', scale: 0.2, hp: 30, name: '노트북' },
+        { img: 'block_images/notebook1.PNG', scale: 0.6, hp: 30, name: '노트북' },
     ],
 ];
 let currentLevel = 0;
@@ -129,25 +124,51 @@ const breakImages = [
     'block_images/box1_2.PNG',
     'block_images/box1_3.PNG',
     'block_images/chur.PNG',
+
+    //stage3 이미지
+    'block_images/notebook2.PNG',
+    'block_images/notebook3.PNG',
+    'block_images/notebook11.PNG',
+    'block_images/notebook22.PNG',
+    'block_images/notebook33.PNG',
 ];
 
-// 기존 이미지와 깨지는 이미지 모두 로드
-[...levels.flat().map((type) => type.img), ...breakImages].forEach((imgPath) => {
-    if (!brickImages[imgPath]) {
-        imagesToLoad++;
-        const image = new Image();
-        image.src = imgPath;
-        console.log(imgPath);
-        image.onload = () => {
-            imagesLoaded++;
-            if (imagesLoaded === imagesToLoad) {
-                randomPlaceBricks();
-                // createTestBrick();
+const loadImages = () => {
+    return new Promise((resolve, reject) => {
+        let totalImages = [...levels.flat().map((type) => type.img), ...breakImages];
+        imagesToLoad = totalImages.length;
+        imagesLoaded = 0;
+
+        totalImages.forEach((imgPath) => {
+            if (!brickImages[imgPath]) {
+                const image = new Image();
+                image.src = imgPath;
+                console.log(imgPath);
+
+                image.onload = () => {
+                    imagesLoaded++;
+                    if (imagesLoaded === imagesToLoad) {
+                        resolve(); // 모든 이미지가 로드되면 resolve 호출
+                    }
+                };
+
+                image.onerror = (e) => {
+                    console.error('❌ 이미지 로드 실패:', imgPath, e);
+                    imagesLoaded++; // 실패한 이미지도 카운트
+                    if (imagesLoaded === imagesToLoad) {
+                        resolve(); // 모든 이미지가 로드되면 resolve 호출
+                    }
+                };
+
+                brickImages[imgPath] = image;
             }
-            // createTestBrick();
-        };
-        brickImages[imgPath] = image;
-    }
+        });
+    });
+};
+
+// 사용 예
+loadImages().then(() => {
+    randomPlaceBricks(); // 모든 이미지가 로드된 후 벽돌 배치
 });
 
 function startGame() {
@@ -199,29 +220,26 @@ function placeBrick(row, col, brickW, brickH, brickObj) {
 function randomPlaceBricks() {
     grid = Array.from({ length: gridRows }, () => Array(gridCols).fill(0));
 
-    // 각 벽돌 종류별로 최소 1개씩 먼저 배치
-    for (let type of brickTypes) {
-        let img = brickImages[type.img];
-        let scale = type.scale || 1;
-        let brickW = Math.ceil((img.naturalWidth * scale) / cellSize);
-        let brickH = Math.ceil((img.naturalHeight * scale) / cellSize);
-        let tries = 0;
-        let placed = false;
-      
-        while (tries < 100 && !placed) {
-            let row = Math.floor(Math.random() * (brickAreaRows - brickH));
-            let col = Math.floor(Math.random() * (gridCols - brickW));
-            if (canPlaceBrick(row, col, brickW, brickH)) {
-                placeBrick(row, col, brickW, brickH, type);
-                placed = true;
-            }
-            tries++;
-        }
+    // ✅ notebook1을 가장 먼저 중앙 상단에 고정 배치
+    const notebook = brickTypes.find((type) => type.img.includes('notebook1'));
+    if (notebook) {
+        const img = brickImages[notebook.img];
+        const scale = notebook.scale || 1;
+        const brickW = Math.ceil((img.naturalWidth * scale) / cellSize);
+        const brickH = Math.ceil((img.naturalHeight * scale) / cellSize);
+
+        const col = Math.floor((gridCols - brickW) / 2); // 중앙 열
+        const row = 1; // 위쪽에서 두 번째 줄 (0은 너무 경계일 수 있음)
+
+        placeBrick(row, col, brickW, brickH, notebook);
     }
 
-    // 나머지 벽돌 랜덤 배치
+    // ✅ notebook을 제외한 나머지 타입 필터링
+    const nonNotebookTypes = brickTypes.filter((type) => !type.img.includes('notebook'));
+
+    // ✅ 나머지 벽돌 랜덤 배치
     for (let n = 0; n < 1000; n++) {
-        let type = brickTypes[Math.floor(Math.random() * brickTypes.length)];
+        let type = nonNotebookTypes[Math.floor(Math.random() * nonNotebookTypes.length)];
         let img = brickImages[type.img];
         let scale = type.scale || 1;
         let brickW = Math.ceil((img.naturalWidth * scale) / cellSize);
@@ -238,6 +256,7 @@ function randomPlaceBricks() {
             }
             tries++;
         }
+
         if (!placed) break;
     }
 }
@@ -295,16 +314,22 @@ function drawPaddle() {
     }
 }
 
-function showClearModal() {
-    $('.clear-score-btn').text(`점수: ${score}`);
-    $('#clear-modal').fadeIn(200);
-}
+// function showClearModal() {
+//     if (animationId) {
+//         cancelAnimationFrame(animationId);
+//         animationId = null;
+//     }
+//     clearInterval(timerInterval); // 타이머도 정지
+//     $('.clear-score-btn').text(`점수: ${score}`);
+//     $('#clear-modal').fadeIn(200);
+// }
 
 function collisionDetection() {
     for (let brick of bricks) {
         if (brick.status === 1) {
             if (x > brick.x && x < brick.x + brick.w && y > brick.y && y < brick.y + brick.h) {
                 dy = -dy;
+
                 // 파워업 상태일 때 hp를 2 감소, 아닐 때는 1 감소
                 if (isPowerUp) {
                     brick.hp -= 2;
@@ -313,7 +338,7 @@ function collisionDetection() {
                 }
 
                 // stage1의 벽돌 처리
-                if (brick.img.includes('glassCup_1') && currentLevel === 0) {
+                if (brick.img.includes('glassCup_1')) {
                     if (brick.hp <= 0) {
                         brick.breakImg = 'block_images/glassCup_2.PNG';
                         brick.status = 2;
@@ -338,16 +363,7 @@ function collisionDetection() {
                         }, 300);
                     }
                 }
-                // stage2의 벽돌 처리 (명확한 분기)
-                else if (brick.img.includes('glassCup_1') && currentLevel === 1) {
-                    if (brick.hp <= 0) {
-                        brick.breakImg = 'block_images/glassCup_2.PNG';
-                        brick.status = 2;
-                        setTimeout(() => {
-                            brick.status = 0;
-                        }, 300);
-                    }
-                }
+
                 // plate2 계열
                 else if (brick.img === 'block_images/plate2_1.PNG') {
                     if (brick.hp === 1) {
@@ -408,9 +424,9 @@ function collisionDetection() {
                             isPowerUp = false;
                             powerUpTimeout = null;
                         }, 5000);
-
-                        setTimeout(() => { brick.status = 0; }, 500);
-
+                        setTimeout(() => {
+                            brick.status = 0;
+                        }, 500);
                     }
                 } else if (brick.img === 'block_images/box1_2.PNG') {
                     if (brick.hp === 1) {
@@ -429,8 +445,9 @@ function collisionDetection() {
                             isPowerUp = false;
                             powerUpTimeout = null;
                         }, 5000);
-
-                        setTimeout(() => { brick.status = 0; }, 500);
+                        setTimeout(() => {
+                            brick.status = 0;
+                        }, 500);
                     }
                 } else if (brick.img === 'block_images/box1_3.PNG') {
                     if (brick.hp <= 0) {
@@ -447,9 +464,41 @@ function collisionDetection() {
                             isPowerUp = false;
                             powerUpTimeout = null;
                         }, 5000);
-
-                        setTimeout(() => { brick.status = 0; }, 500);
+                        setTimeout(() => {
+                            brick.status = 0;
+                        }, 500);
                     }
+                } else if (brick.img.startsWith('block_images/notebook')) {
+                    if (!brick.notebookLevel) brick.notebookLevel = 1;
+                    if (!brick.notebookHitCount) brick.notebookHitCount = 0;
+
+                    const originalImg = `block_images/notebook${brick.notebookLevel}.PNG`;
+                    const flashImg = `block_images/notebook${brick.notebookLevel}${brick.notebookLevel}.PNG`;
+
+                    // 임시로 flash 이미지로 변경
+                    brick.img = flashImg;
+
+                    // 원래 이미지로 되돌리기
+                    setTimeout(() => {
+                        brick.img = originalImg;
+                    }, 100); // 100ms 동안만 효과 보여줌
+
+                    // notebook 레벨 업 처리
+                    brick.notebookHitCount++;
+                    if (brick.notebookLevel < 3 && brick.notebookHitCount >= 10) {
+                        brick.notebookLevel++;
+                        brick.notebookHitCount = 0;
+                        brick.img = `block_images/notebook${brick.notebookLevel}.PNG`;
+                    }
+
+                    // notebook3이면 깨짐
+                    // if (brick.notebookLevel === 3 && brick.hp <= 0) {
+                    //     brick.breakImg = 'block_images/notebook_4.PNG';
+                    //     brick.status = 2;
+                    //     setTimeout(() => {
+                    //         brick.status = 0;
+                    //     }, 300);
+                    // }
                 }
 
                 // 벽돌이 깨질 때, 해당 벽돌의 최초 hp만큼 점수 증가
@@ -475,16 +524,15 @@ function collisionDetection() {
                     $('#score-box').text('점수: ' + score);
                 }
 
-                // 모든 벽돌이 깨졌을 때 게임 클리어 처리
                 if (isAllBricksCleared()) {
                     setTimeout(() => {
                         console.log('1.5초간 기다립니다.');
                         isGameClear = true;
-                        showClearModal();
-                        cancelAnimationFrame(animationId);
+                        // showClearModal(); // 클리어 모달 띄움
+                        cancelAnimationFrame(animationId); // 애니메이션 중단
                         animationId = null;
-                        if (currentLevel === 1) {  // stage2일 때 타이머도 정지
-                            clearInterval(timerInterval);
+                        if (currentLevel === 2) {
+                            clearInterval(timerInterval); // 타이머도 정지 (stage2일 때만)
                         }
                     }, 1500);
                 }
@@ -494,26 +542,28 @@ function collisionDetection() {
 }
 
 function isAllBricksCleared() {
-    // 모든 brick의 status가 0이거나 hp가 0이라면 true 반환
+    //모든 brick의 hp가 0이라면 true 반환
     return bricks.every((brick) => brick.status === 0 || brick.hp <= 0);
 }
 
 function draw() {
     if (isGameClear || isGameOver) {
-        // 게임이 클리어되거나 오버되면 애니메이션 중지
-        cancelAnimationFrame(animationId);
-        animationId = null;
+        if (animationId) {
+            cancelAnimationFrame(animationId);
+            animationId = null;
+        }
         return;
     }
-
-    if (animationId) cancelAnimationFrame(animationId);
+    // if (animationId) cancelAnimationFrame(animationId);
     animationId = requestAnimationFrame(draw);
 
+    if (isGameClear || isGameOver) return;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
+
     // 파워업 상태일 때 캔버스 테두리 그리기
     if (isPowerUp) {
-        ctx.strokeStyle = '#FFD700';  // 노란색
+        ctx.strokeStyle = '#FFD700'; // 노란색
         ctx.lineWidth = 5;
         ctx.strokeRect(0, 0, canvas.width, canvas.height);
         // 빛나는 효과를 위한 box-shadow 추가
@@ -522,54 +572,11 @@ function draw() {
         // 파워업이 아닐 때는 box-shadow 제거
         canvas.style.boxShadow = 'none';
     }
-    
 
     drawBricks();
     if (!isRespawning) drawBall();
     drawPaddle();
     collisionDetection();
-
-    // stage2에서 hand 이미지 그리기와 충돌 처리
-    if (currentLevel === 1 && handImage.complete && !isGameClear) {
-        const handWidth = handImage.naturalWidth / 3;
-        const handHeight = handImage.naturalHeight / 3;
-        const handY = canvas.height / 2 - handHeight / 2;
-        
-        // hand 이미지 위치 업데이트
-        handX += handSpeed * handDirection;
-        
-        // 화면 경계에 도달하면 방향 전환
-        if (handX + handWidth > canvas.width) {
-            handX = canvas.width - handWidth;
-            handDirection = -1;
-        } else if (handX < 0) {
-            handX = 0;
-            handDirection = 1;
-        }
-        
-        // hand 이미지 그리기 (캔버스 중앙 높이에 위치)
-        ctx.drawImage(
-            handImage,
-            handX,
-            handY,
-            handWidth,
-            handHeight
-        );
-
-        // 공이 hand 이미지와 충돌하는지 확인
-        if (!isRespawning) {
-            if (x + ballRadius > handX && x - ballRadius < handX + handWidth) {
-                // 공이 hand 이미지의 하단에만 부딪히는 경우
-                if (y + ballRadius > handY + handHeight/2 && y - ballRadius < handY + handHeight) {
-                    // 아래 방향으로 랜덤한 각도로 공을 튕겨냄 (0도 ~ 60도)
-                    const angle = (Math.random() * 60) * Math.PI / 180;
-                    const speed = Math.sqrt(dx * dx + dy * dy);
-                    dx = speed * Math.sin(angle) * (Math.random() > 0.5 ? 1 : -1);  // 좌우 방향 랜덤
-                    dy = speed * Math.cos(angle);  // 항상 아래 방향
-                }
-            }
-        }
-    }
 
     if (isRespawning) return;
 
@@ -702,10 +709,6 @@ function restartGame() {
         clearTimeout(powerUpTimeout);
         powerUpTimeout = null;
     }
-
-    handX = 0;  // hand 위치 초기화
-    handDirection = 1;  // hand 방향 초기화
-
     x = canvas.width / 2;
     y = canvas.height - paddleHeight - 15;
     dx = BASE_SPEED_X * (Math.random() > 0.5 ? 1 : -1);
