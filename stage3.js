@@ -1,5 +1,5 @@
 let timerInterval = null;
-let timeLeft = 5;
+let timeLeft = 30;
 $(document).ready(function () {
     const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d');
