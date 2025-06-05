@@ -1,4 +1,5 @@
 let timerInterval = null;
+let timeLeft = 5;
 $(document).ready(function () {
     const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d');
@@ -8,12 +9,6 @@ $(document).ready(function () {
     if (selectedCatTheme && ['cat1', 'cat2', 'cat3'].includes(selectedCatTheme)) {
         changeBallImage(selectedCatTheme);
     }
-
-    // 안내 텍스트
-    // ctx.font = '32px sans-serif';
-    // ctx.fillStyle = '#888';
-    // ctx.textAlign = 'center';
-    // ctx.fillText('여기서 게임이 시작됩니다!', canvas.width / 2, canvas.height / 2);
 
     // 모달 이미지 슬라이드
     let currentImageIndex = 1;
@@ -49,7 +44,6 @@ $(document).ready(function () {
     });
 
     // 타이머
-    let timeLeft = 10;
 
     function startGameTimer() {
         $('#time-remaining').text(timeLeft);
@@ -102,9 +96,4 @@ $(document).ready(function () {
         }
         if (typeof startGame === 'function') startGame();
     }
-}); // <-- 이 닫는 중괄호/괄호가 빠져있었음
-
-// // 게임 시작 외부 정의
-// function startGame() {
-//     console.log('Game started');
-// }
+});

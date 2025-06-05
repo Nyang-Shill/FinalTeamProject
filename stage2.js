@@ -11,69 +11,31 @@ $(document).ready(function () {
     }
 
     // 캔버스 안내 텍스트
-    // const canvas = document.getElementById('game-canvas');
-    // const ctx = canvas.getContext('2d');
-    // ctx.font = '32px sans-serif';
-    // ctx.fillStyle = '#888';
-    // ctx.textAlign = 'center';
-    // ctx.fillText('여기서 게임이 시작됩니다!', canvas.width / 2, canvas.height / 2);
-    // 현재 이미지 인덱스 관리
-    let currentImageIndex = 1;
-    const maxImageIndex = 3;  // 최대 이미지 번호
-
-    // 화살표 표시/숨김 업데이트 함수
-    function updateArrows() {
-        if (currentImageIndex === 1) {
-            $('.left-arrow').css('visibility', 'hidden');
-        } else {
-            $('.left-arrow').css('visibility', 'visible');
-        }
-
-        if (currentImageIndex === maxImageIndex) {
-            $('.right-arrow').css('visibility', 'hidden');
-            $('#skip-btn').text('게임 시작');
-        } else {
-            $('.right-arrow').css('visibility', 'visible');
-            $('#skip-btn').text('SKIP');
-        }
-    }
-
-    // 이미지 변경 함수
-    function changeImage(index) {
-        const introImage = $('.intro-image');
-        introImage.fadeOut(200, function() {
-            introImage.attr('src', `scenes_images/stage2_${index}.png`);
-            introImage.fadeIn(200);
-            updateArrows();  // 이미지 변경 후 화살표 상태 업데이트
-        });
-    }
-
-    // 오른쪽 화살표 클릭 이벤트
-    $('.right-arrow').click(function() {
-        if (currentImageIndex < maxImageIndex) {
-            currentImageIndex++;
-            changeImage(currentImageIndex);
-        }
-    });
-
-    // 왼쪽 화살표 클릭 이벤트
-    $('.left-arrow').click(function() {
-        if (currentImageIndex > 1) {
-            currentImageIndex--;
-            changeImage(currentImageIndex);
-        }
-    });
+    const canvas = document.getElementById('game-canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.font = '32px sans-serif';
+    ctx.fillStyle = '#888';
+    ctx.textAlign = 'center';
+    ctx.fillText('여기서 게임이 시작됩니다!', canvas.width / 2, canvas.height / 2);
 
     // 인트로 팝업 자동 표시
     $('#intro-modal').fadeIn(200);
-    updateArrows();  // 초기 화살표 상태 설정
 
-    // SKIP/게임 시작 버튼 클릭 시 즉시 닫힘
+    // 5초 후 자동 닫힘
+    let introTimeout = setTimeout(function () {
+        $('#intro-modal').fadeOut(200, function () {
+            if (typeof setLevelAndStart === 'function') setLevelAndStart();
+            startGameTimer();
+        });
+    }, 5000);
+
+    // SKIP 버튼 클릭 시 즉시 닫힘
     $('#skip-btn').click(function () {
         $('#intro-modal').fadeOut(200, function () {
             if (typeof setLevelAndStart === 'function') setLevelAndStart();
             startGameTimer();
         });
+        clearTimeout(introTimeout);
     });
 
     // 제한시간 타이머
@@ -97,30 +59,33 @@ $(document).ready(function () {
         $('#clear-modal').fadeIn(200);
     }
 
-    // 팝업 버튼 동작
+    // 팝업 버튼 동작 (예시)
     $('.clear-next-btn').click(function () {
         window.location.href = 'stage3.html';
     });
     $('.clear-home-btn').click(function () {
         window.location.href = 'home.html';
     });
+    // 점수 버튼은 필요에 따라 동작 추가
 
     function getStageLevelFromFilename() {
+        // 예: stage2.html, stage2.js → 2
+        // location.pathname: /경로/stage2.html
+        // 또는 현재 JS 파일명에서 추출
         const match = window.location.pathname.match(/stage(\d+)/);
         if (match) {
+            // currentLevel은 0부터 시작이므로 -1
             return parseInt(match[1], 10) - 1;
         }
-        return 0;
+        return 0; // 기본값: 1스테이지
     }
 
     function setLevelAndStart() {
-
-        currentLevel = getStageLevelFromFilename();
-        brickTypes = levels[currentLevel];
-        bricks = [];
-        grid = Array.from({ length: gridRows }, () => Array(gridCols).fill(0));
-        randomPlaceBricks();
-
+        if (typeof currentLevel !== 'undefined') {
+            currentLevel = getStageLevelFromFilename();
+            brickTypes = levels[currentLevel];
+            randomPlaceBricks();
+        }
         if (typeof startGame === 'function') startGame();
     }
 });

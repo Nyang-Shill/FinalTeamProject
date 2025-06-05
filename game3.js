@@ -572,6 +572,13 @@ function draw() {
     if (!isRespawning) drawBall();
     drawPaddle();
     collisionDetection();
+    if (timeLeft <= 0) {
+        isGameOver = true;
+        console.log('게임 오버');
+        showClearModal();
+        cancelAnimationFrame(animationId);
+        animationId = null;
+    }
 
     if (isRespawning) return;
 
