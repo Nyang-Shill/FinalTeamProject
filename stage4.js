@@ -1,62 +1,3 @@
-$(document).ready(function () {
-  // 저장된 테마 적용
-  const selectedCatTheme = localStorage.getItem('selectedCatTheme');
-  console.log('stage4에서 읽은 테마:', selectedCatTheme);
-  
-  if (selectedCatTheme) {
-    if (selectedCatTheme === 'cat1' || selectedCatTheme === 'cat2' || selectedCatTheme === 'cat3') {
-      console.log('테마 적용:', selectedCatTheme);
-      changeBallImage(selectedCatTheme);
-    }
-  }
-
-// 테마에 따른 고양이 이미지 매핑
-const catThemeMapping = {
-    'cat1': 'cat2.jpg',
-    'cat2': 'cat1.jpg',
-    'cat3': 'cat3.jpg'
-};
-
-// 테마에 따른 공 이미지 매핑
-const ballThemeMapping = {
-    'cat1': 1,
-    'cat2': 2,
-    'cat3': 3
-};
-
-
-  // 인트로 팝업 자동 표시
-  $('#intro-modal').fadeIn(200);
-
-  // 5초 후 자동 닫힘
-  let introTimeout = setTimeout(function () {
-    $('#intro-modal').fadeOut(200, startGameTimer);
-  }, 5000);
-
-  // SKIP 버튼 클릭 시 즉시 닫힘
-  $('#skip-btn').click(function () {
-    $('#intro-modal').fadeOut(200, startGameTimer);
-    clearTimeout(introTimeout);
-  });
-
-  // 제한시간 타이머
-  let timeLeft = 30;
-  let timerInterval = null;
-
-
-  function startGameTimer() {
-    $('#time-remaining').text(timeLeft);
-    timerInterval = setInterval(function () {
-      timeLeft--;
-      $('#time-remaining').text(timeLeft);
-      if (timeLeft <= 0) {
-        clearInterval(timerInterval);
-        showClearModal();
-      }
-    }, 1000);
-  }
-
-
 console.log("stage4.js 파일 로드됨");
 
 // jQuery가 로드되었는지 확인
@@ -69,10 +10,11 @@ if (typeof jQuery === 'undefined') {
 // 전역 변수 선언
 let canvas, ctx;
 let catImg, handImg, ballImages, brickImages;
-let centerX, centerY, score;
+let centerX, centerY, score, timeLeft;
 let balls = [], bricks = [], particles = [];
 let lastSpawn = 0, maxBalls = 3;
 let gameStarted = false;
+let selectedCatTheme = null;
 let currentEndImageIndex = 1;
 const maxEndImageIndex = 4;
 let backgroundImg = new Image(); // 배경 이미지 객체 추가
@@ -106,6 +48,13 @@ const brickTypes = {
         height: 100, // 택배상자 크기 증가
         breakDelay: 300 // 0.3초
     }
+};
+
+// 테마에 따른 고양이 이미지 매핑
+const catThemeMapping = {
+    'select_cat1.jpg': 'cat2.jpg',
+    'select_cat2.jpg': 'cat1.jpg',
+    'select_cat3.jpg': 'cat3.jpg'
 };
 
 // 전역 변수 추가
@@ -218,17 +167,13 @@ function initImages() {
     }
     
     // 선택된 테마 가져오기
-    const selectedTheme = localStorage.getItem('selectedCatTheme') || 'cat1';
-    console.log('선택된 고양이 테마:', selectedTheme);
-
+    const selectedTheme = localStorage.getItem('selectedCatTheme') || 'select_cat1.jpg';
     
     // 고양이 이미지 로드 (테마에 따라)
     const catImageName = catThemeMapping[selectedTheme] || 'cat2.jpg';
     catImg.onload = checkImagesLoaded;
     catImg.onerror = () => handleImageError(catImg, "고양이");
     catImg.src = `./images/${catImageName}`;
-    console.log('로드할 고양이 이미지:', catImg.src);
-
     
     // 패들 이미지 로드 (hand.PNG)
     handImg.onload = checkImagesLoaded;
@@ -236,17 +181,18 @@ function initImages() {
     handImg.src = "./images/hand.PNG";
     
     // 공 이미지 로드 (선택된 테마에 따라 하나의 공 이미지만 사용)
-    const ballImageIndex = ballThemeMapping[selectedTheme] || 1;
-    console.log('선택된 공 이미지 인덱스:', ballImageIndex);
-
+    let ballImageIndex = 1; // 기본값
+    if (selectedTheme === 'select_cat2.jpg') {
+        ballImageIndex = 2;
+    } else if (selectedTheme === 'select_cat3.jpg') {
+        ballImageIndex = 3;
+    }
     
     const ballImg = new Image();
     ballImg.onload = checkImagesLoaded;
     ballImg.onerror = () => handleImageError(ballImg, "공");
     ballImg.src = `./ball_images/ball${ballImageIndex}.PNG`;
-    console.log('로드할 공 이미지:', ballImg.src);
-    ballImages = [ballImg];
-
+    ballImages = [ballImg]; // 하나의 공 이미지만 사용
     
     // 벽돌 이미지 로드
     Object.entries(brickTypes).forEach(([type, data]) => {
@@ -269,21 +215,6 @@ function initImages() {
     // 전체 이미지 수 계산
     totalImages = 2 + ballImages.length + Object.values(brickTypes).reduce((sum, type) => sum + type.images.length, 0);
 }
-
-
-  // 스테이지 클리어 팝업 표시
-  function showClearModal() {
-    $('#clear-modal').fadeIn(200);
-  }
-
-  // 팝업 버튼 동작 (예시)
-  $('.clear-next-btn').click(function () {
-    window.location.href = 'stage2.html';
-  });
-  $('.clear-home-btn').click(function () {
-    window.location.href = 'home.html';
-  });
-  // 점수 버튼은 필요에 따라 동작 추가
 
 // 게임 시작 함수
 function startGame() {
@@ -469,6 +400,18 @@ $(document).ready(function() {
                 console.log("스테이지 클리어 팝업 표시됨");
             }, 100);
         });
+    });
+
+    // 스테이지 클리어 팝업의 홈으로 버튼 클릭 이벤트
+    $(document).on('click', '.clear-home-btn', function() {
+        console.log("홈으로 버튼 클릭됨");
+        window.location.href = 'home.html';
+    });
+
+    // 스테이지 클리어 팝업의 점수 버튼 클릭 이벤트
+    $(document).on('click', '.clear-score-btn', function() {
+        console.log("점수 버튼 클릭됨");
+        $(this).text(`점수: ${score}`);
     });
 
     // 오른쪽 화살표 클릭 이벤트
@@ -778,7 +721,7 @@ function updateBalls() {
     });
 }
 
-// 게임 종료 체크 함수 추가
+// 게임 종료 체크 함수
 function checkGameEnd() {
     if (bricks.length === 0) {
         // 모든 벽돌이 깨졌을 때 1.5초 후에 게임 종료
@@ -835,4 +778,4 @@ function updateEndArrows() {
         }
     }
 }
-})
+
