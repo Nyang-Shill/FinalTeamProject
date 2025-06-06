@@ -59,7 +59,6 @@ $(document).ready(function () {
 
 
     // 테마 적용
-    const selectedCatTheme = localStorage.getItem('selectedCatTheme');
     if (selectedCatTheme && ['cat1', 'cat2', 'cat3'].includes(selectedCatTheme)) {
         changeBallImage(selectedCatTheme);
     }
