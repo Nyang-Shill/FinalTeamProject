@@ -328,11 +328,29 @@ function collisionDetection() {
     for (let brick of bricks) {
         if (brick.status === 1) {
             if (x > brick.x && x < brick.x + brick.w && y > brick.y && y < brick.y + brick.h) {
-                const angle = (Math.random() * Math.PI) / 4 - Math.PI / 8; // -45도에서 45도 사이의 랜덤 각도
-                const speed = Math.sqrt(dx * dx + dy * dy); // 현재 속도 계산
+                const overlapLeft = Math.abs(x + ballRadius - brick.x);
+                const overlapRight = Math.abs(brick.x + brick.w - (x - ballRadius));
+                const overlapTop = Math.abs(y + ballRadius - brick.y);
+                const overlapBottom = Math.abs(brick.y + brick.h - (y - ballRadius));
+
+                const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+
+                if (minOverlap === overlapLeft || minOverlap === overlapRight) {
+                    // 좌우 충돌: 수평 방향 반전
+                    dx = -dx;
+                } else {
+                    // 상하 충돌: 수직 방향 반전
+                    dy = -dy;
+                }
+
+                // speed 유지
+                const speed = Math.sqrt(dx * dx + dy * dy);
+                const angleVariation = (Math.random() - 0.5) * (Math.PI / 12); // ±15도 흔들림
+                const angle = Math.atan2(dy, dx) + angleVariation;
+
                 dx = speed * Math.cos(angle);
                 dy = speed * Math.sin(angle);
-                // 파워업 상태일 때 hp를 2 감소, 아닐 때는 1 감소
+
                 if (isPowerUp) {
                     brick.hp -= 2;
                 } else {
