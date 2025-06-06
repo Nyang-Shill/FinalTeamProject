@@ -410,6 +410,8 @@ $(document).ready(function() {
         $('#game-end-modal').fadeOut(200, function() {
             console.log("게임 종료 팝업이 사라짐");
             setTimeout(function() {
+                // 점수 버튼의 텍스트를 바로 설정
+                $('.clear-score-btn').text(`수리비: ${score}원`);
                 $('#clear-modal').fadeIn(200);
                 console.log("스테이지 클리어 팝업 표시됨");
             }, 100);
@@ -420,12 +422,6 @@ $(document).ready(function() {
     $(document).on('click', '.clear-home-btn', function() {
         console.log("홈으로 버튼 클릭됨");
         window.location.href = 'home.html';
-    });
-
-    // 스테이지 클리어 팝업의 점수 버튼 클릭 이벤트
-    $(document).on('click', '.clear-score-btn', function() {
-        console.log("점수 버튼 클릭됨");
-        $(this).text(`수리비: ${score}원`);
     });
 
     // 오른쪽 화살표 클릭 이벤트
