@@ -1,4 +1,31 @@
 $(document).ready(function () {
+    // 배경음악 재생
+    const bgm = document.getElementById('bgm');
+    bgm.volume = 0.5; // 볼륨을 50%로 설정
+    
+    // 배경음악 재생 시도
+    function playBGM() {
+        const playPromise = bgm.play();
+        
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                console.log("배경음악 재생 시작");
+            }).catch(error => {
+                console.log("배경음악 재생 실패:", error);
+                // 재생 실패 시 사용자 상호작용 후 재시도
+                document.addEventListener('click', function initPlay() {
+                    bgm.play();
+                    document.removeEventListener('click', initPlay);
+                }, { once: true });
+            });
+        }
+    }
+
+    // 페이지 로드 시 즉시 재생 시도
+    window.addEventListener('load', function() {
+        playBGM();
+    });
+
     // 게임 시작 버튼 클릭 시 스테이지 모달 표시
     $('#startBtn').click(function () {
         $('#stageModal').fadeIn(300);

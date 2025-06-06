@@ -9,6 +9,7 @@ const maxImageIndex = 2;
 
 $(document).ready(function () {
     // 테마 적용
+    const selectedCatTheme = localStorage.getItem('selectedCatTheme');
     if (selectedCatTheme && ['cat1', 'cat2', 'cat3'].includes(selectedCatTheme)) {
         changeBallImage(selectedCatTheme);
     }
@@ -77,6 +78,11 @@ $(document).ready(function () {
 
     $('#skip-btn').click(function () {
         $('#intro-modal').fadeOut(200, function () {
+            // 배경음악 재생
+            const bgm = document.getElementById('bgm');
+            bgm.volume = 0.5;
+            bgm.play();
+            
             if (typeof setLevelAndStart === 'function') setLevelAndStart();
             startGameTimer();
         });

@@ -4,8 +4,15 @@
         <meta charset="UTF-8" />
         <title>Stage 1</title>
         <link rel="stylesheet" href="stage1.css" />
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="game.js" defer></script>
+        <script src="stage1.js" defer></script>
     </head>
     <body>
+        <audio id="bgm" loop preload="auto">
+            <source src="bgm/stage1.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
         <div class="stage-container">
             <div class="stage-content">
                 <div class="stage-title">Stage 1</div>
@@ -37,8 +44,5 @@
                 </div>
             </div>
         </div>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="game.js"></script>
-        <script src="stage1.js"></script>
     </body>
 </html>
