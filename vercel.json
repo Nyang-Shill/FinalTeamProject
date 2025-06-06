@@ -1,6 +1,0 @@
-{
-    "routes": [
-      { "source": "/", "destination": "/home.html" }
-    ]
-}
-  
