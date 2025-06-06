@@ -1,16 +1,16 @@
 $(document).ready(function () {
     // 테마에 따른 배경 이미지 매핑
     const backgroundThemeMapping = {
-        interior1: 'background1.png',
-        interior2: 'background2.png',
-        interior3: 'background3.png',
+        'interior1': 'background1.png',
+        'interior2': 'background2.png',
+        'interior3': 'background3.png'
     };
 
     // 테마에 따른 stage-title 색상 매핑
     const titleColorMapping = {
-        interior1: '#617131',
-        interior2: '#878A37',
-        interior3: '#AC9903',
+        'interior1': '#617131',
+        'interior2': '#878A37',
+        'interior3': '#AC9903'
     };
 
     // 배경 이미지 설정
@@ -25,10 +25,12 @@ $(document).ready(function () {
         document.body.style.backgroundRepeat = 'no-repeat';
         // stage-title 색상 설정
         $('.stage-title').css({
-            color: titleColorMapping[selectedTheme],
-            'border-color': titleColorMapping[selectedTheme],
+
+            'color': titleColorMapping[selectedTheme],
+            'border-color': titleColorMapping[selectedTheme]
         });
-        console.log('배경 이미지 설정:', backgroundImageName);
+        console.log("배경 이미지 설정:", backgroundImageName);
+
     } else {
         // 기본 배경 이미지 설정
         document.body.style.backgroundImage = `url('./images/background1.png')`;
@@ -37,10 +39,11 @@ $(document).ready(function () {
         document.body.style.backgroundRepeat = 'no-repeat';
         // 기본 stage-title 색상 설정
         $('.stage-title').css({
-            color: '#617131',
-            'border-color': '#617131',
+
+            'color': '#617131',
+            'border-color': '#617131'
         });
-        console.log('기본 배경 이미지 설정: background1.png');
+        console.log("기본 배경 이미지 설정: background1.png");
     }
 
     // 저장된 테마 적용
@@ -176,7 +179,9 @@ $(document).ready(function () {
 
     // 게임 초기화 함수
     function initGame() {
-        console.log('게임 초기화 시작');
+
+        console.log("게임 초기화 시작");
+        
 
         // 캔버스 초기화
         canvas = document.getElementById('game-canvas');
@@ -191,19 +196,21 @@ $(document).ready(function () {
             return;
         }
 
+        
         // 캔버스 크기 설정
         canvas.width = 800;
         canvas.height = 600;
-
+        
         // 캔버스 스타일 설정
         canvas.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+        
 
         // 게임 변수 초기화
         centerX = canvas.width / 2;
         centerY = canvas.height / 2;
         score = 0;
         timeLeft = 30;
-
+        
         // 이벤트 리스너 설정
         setupEventListeners();
 
