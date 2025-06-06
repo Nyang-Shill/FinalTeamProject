@@ -1,3 +1,4 @@
+
 // 전역 변수 선언
 let timeLeft = 30;
 let timerInterval = null;
@@ -56,23 +57,29 @@ $(document).ready(function () {
     const selectedCatTheme = localStorage.getItem('selectedCatTheme');
     console.log('stage3에서 읽은 테마:', selectedCatTheme);
 
-    if (selectedCatTheme) {
-        if (selectedCatTheme === 'cat1' || selectedCatTheme === 'cat2' || selectedCatTheme === 'cat3') {
-            console.log('테마 적용:', selectedCatTheme);
-            changeBallImage(selectedCatTheme);
-        }
+
+    // 테마 적용
+    const selectedCatTheme = localStorage.getItem('selectedCatTheme');
+    if (selectedCatTheme && ['cat1', 'cat2', 'cat3'].includes(selectedCatTheme)) {
+        changeBallImage(selectedCatTheme);
     }
 
-    // 캔버스 안내 텍스트
-    const canvas = document.getElementById('game-canvas');
-    const ctx = canvas.getContext('2d');
-    ctx.font = '32px sans-serif';
-    ctx.fillStyle = '#888';
-    ctx.textAlign = 'center';
-    ctx.fillText('여기서 게임이 시작됩니다!', canvas.width / 2, canvas.height / 2);
+    // 모달 이미지 슬라이드
+    let currentImageIndex = 1;
+    const maxImageIndex = 2;
 
-    // 인트로 팝업 자동 표시
     $('#intro-modal').fadeIn(200);
+    updateArrowVisibility();
+    updateSkipButton();
+
+    $('.left-arrow').click(function () {
+        if (currentImageIndex > 1) {
+            currentImageIndex--;
+            updateImage();
+            updateArrowVisibility();
+            updateSkipButton();
+        }
+    });
 
     // SKIP 버튼 클릭 시 즉시 닫힘
     $('#skip-btn').click(function () {
@@ -100,6 +107,7 @@ $(document).ready(function () {
         }
         if (typeof startGame === 'function') startGame();
     }
+
 
     // 인트로 모달 표시
     $('#intro-modal').show();
@@ -307,3 +315,4 @@ function initGame() {
     // 이미지 초기화
     initImages();
 }
+
