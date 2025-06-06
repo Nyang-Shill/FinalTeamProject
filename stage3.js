@@ -9,6 +9,7 @@ const maxImageIndex = 2;
 
 $(document).ready(function () {
     // 테마 적용
+    const selectedCatTheme = localStorage.getItem('selectedCatTheme');
     if (selectedCatTheme && ['cat1', 'cat2', 'cat3'].includes(selectedCatTheme)) {
         changeBallImage(selectedCatTheme);
     }
@@ -61,7 +62,20 @@ $(document).ready(function () {
     updateIntroArrows();
     updateIntroSkipButton();
 
-    // SKIP/게임 시작 버튼 클릭 시 즉시 닫힘
+    $('.left-arrow').click(function () {
+        if (currentImageIndex > 1) {
+            currentImageIndex--;
+            updateIntroImage();
+        }
+    });
+
+    $('.right-arrow').click(function () {
+        if (currentImageIndex < maxImageIndex) {
+            currentImageIndex++;
+            updateIntroImage();
+        }
+    });
+
     $('#skip-btn').click(function () {
         $('#intro-modal').fadeOut(200, function () {
             // 배경음악 재생
@@ -72,22 +86,7 @@ $(document).ready(function () {
             if (typeof setLevelAndStart === 'function') setLevelAndStart();
             startGameTimer();
         });
-
-    $('.left-arrow').click(function () {
-        if (currentImageIndex > 1) {
-            currentImageIndex--;
-            updateIntroImage();
-        }
-
     });
-
-    $('.right-arrow').click(function () {
-        if (currentImageIndex < maxImageIndex) {
-            currentImageIndex++;
-            updateIntroImage();
-        }
-    });
-
 
     // 인트로 관련 함수
     function updateIntroImage() {
