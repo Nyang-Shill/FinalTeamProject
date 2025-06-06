@@ -52,9 +52,9 @@ const brickTypes = {
 
 // 테마에 따른 고양이 이미지 매핑
 const catThemeMapping = {
-    'select_cat1.jpg': 'cat2.jpg',
-    'select_cat2.jpg': 'cat1.jpg',
-    'select_cat3.jpg': 'cat3.jpg'
+    'cat1': 'paddle1.PNG',
+    'cat2': 'paddle2.PNG',
+    'cat3': 'paddle3.PNG'
 };
 
 // 전역 변수 추가
@@ -107,19 +107,23 @@ function initGame() {
     score = 0;
     timeLeft = 30;
     
-    // 선택된 테마에 따라 배경 이미지 설정
-    const selectedTheme = localStorage.getItem('selectedInteriorTheme');
-    console.log('선택된 인테리어 테마:', selectedTheme);
+    // 선택된 테마 가져오기 및 적용
+    const selectedCatTheme = localStorage.getItem('selectedCatTheme');
+    const selectedInteriorTheme = localStorage.getItem('selectedInteriorTheme');
     
-    if (selectedTheme && backgroundThemeMapping[selectedTheme]) {
-        const backgroundImageName = backgroundThemeMapping[selectedTheme];
+    console.log('선택된 고양이 테마:', selectedCatTheme);
+    console.log('선택된 인테리어 테마:', selectedInteriorTheme);
+    
+    // 인테리어 테마 적용
+    if (selectedInteriorTheme && backgroundThemeMapping[selectedInteriorTheme]) {
+        const backgroundImageName = backgroundThemeMapping[selectedInteriorTheme];
         document.body.style.backgroundImage = `url('./images/${backgroundImageName}')`;
         document.body.style.backgroundSize = 'cover';
         document.body.style.backgroundPosition = 'center';
         document.body.style.backgroundRepeat = 'no-repeat';
         $('.stage-title').css({
-            'color': titleColorMapping[selectedTheme],
-            'border-color': titleColorMapping[selectedTheme]
+            'color': titleColorMapping[selectedInteriorTheme],
+            'border-color': titleColorMapping[selectedInteriorTheme]
         });
         console.log("배경 이미지 설정:", backgroundImageName);
     } else {
@@ -133,6 +137,9 @@ function initGame() {
         });
         console.log("기본 배경 이미지 설정: background1.png");
     }
+
+    // 이미지 초기화 호출
+    initImages();
     
     // 이벤트 리스너 설정
     setupEventListeners();
@@ -156,7 +163,6 @@ function initImages() {
         console.log(`이미지 로드 진행: ${imagesLoaded}/${totalImages}`);
         if (imagesLoaded + imagesFailed >= totalImages) {
             console.log("모든 이미지 로드 완료");
-            // 이미지 로드 완료 후에도 자동으로 게임을 시작하지 않음
         }
     }
     
@@ -167,13 +173,21 @@ function initImages() {
     }
     
     // 선택된 테마 가져오기
-    const selectedTheme = localStorage.getItem('selectedCatTheme') || 'select_cat1.jpg';
+    const selectedTheme = localStorage.getItem('selectedCatTheme') || 'cat1';
+    console.log('Stage4 - 선택된 고양이 테마:', selectedTheme);
     
     // 고양이 이미지 로드 (테마에 따라)
-    const catImageName = catThemeMapping[selectedTheme] || 'cat2.jpg';
-    catImg.onload = checkImagesLoaded;
-    catImg.onerror = () => handleImageError(catImg, "고양이");
-    catImg.src = `./images/${catImageName}`;
+    const catImageName = catThemeMapping[selectedTheme] || 'paddle1.PNG';
+    console.log('Stage4 - 로드할 고양이 이미지:', catImageName);
+    catImg.onload = () => {
+        console.log('Stage4 - 고양이 이미지 로드 성공:', catImg.src);
+        checkImagesLoaded();
+    };
+    catImg.onerror = () => {
+        console.error('Stage4 - 고양이 이미지 로드 실패:', catImg.src);
+        handleImageError(catImg, "고양이");
+    };
+    catImg.src = `./paddle_images/${catImageName}`;
     
     // 패들 이미지 로드 (hand.PNG)
     handImg.onload = checkImagesLoaded;
@@ -182,9 +196,9 @@ function initImages() {
     
     // 공 이미지 로드 (선택된 테마에 따라 하나의 공 이미지만 사용)
     let ballImageIndex = 1; // 기본값
-    if (selectedTheme === 'select_cat2.jpg') {
+    if (selectedTheme === 'cat2') {
         ballImageIndex = 2;
-    } else if (selectedTheme === 'select_cat3.jpg') {
+    } else if (selectedTheme === 'cat3') {
         ballImageIndex = 3;
     }
     
@@ -411,7 +425,7 @@ $(document).ready(function() {
     // 스테이지 클리어 팝업의 점수 버튼 클릭 이벤트
     $(document).on('click', '.clear-score-btn', function() {
         console.log("점수 버튼 클릭됨");
-        $(this).text(`점수: ${score}`);
+        $(this).text(`수리비: ${score}원`);
     });
 
     // 오른쪽 화살표 클릭 이벤트
@@ -483,32 +497,54 @@ function createBall() {
 function createBricks() {
     bricks = [];
     const types = Object.keys(brickTypes);
+    const minRadius = 80; // Reduced from 120 to move bricks even more inside
+    const maxRadius = 180; // Reduced from 220 to keep bricks closer to center
+    const minSpacing = 60; // Minimum spacing between bricks
     
-    for (let i = 0; i < 15; i++) {
+    let attempts = 0;
+    const maxAttempts = 100; // Prevent infinite loops
+    
+    while (bricks.length < 15 && attempts < maxAttempts) {
         const angle = Math.random() * Math.PI * 2;
-        const radius = 180 + Math.random() * 80; // 원의 반지름을 180~260으로 설정
+        const radius = minRadius + Math.random() * (maxRadius - minRadius);
         const x = centerX + radius * Math.cos(angle);
         const y = centerY + radius * Math.sin(angle);
         const type = types[Math.floor(Math.random() * types.length)];
         const brickType = brickTypes[type];
         
-        // 벽돌이 화면 밖으로 나가지 않도록 위치 조정
-        const margin = 20; // 화면 가장자리 여백
+        // Check if position would be valid (inside canvas with margin)
+        const margin = 20;
         const adjustedX = Math.max(margin, Math.min(canvas.width - brickType.width - margin, x));
         const adjustedY = Math.max(margin, Math.min(canvas.height - brickType.height - margin, y));
         
-        bricks.push({
-            x: adjustedX, 
-            y: adjustedY, 
-            w: brickType.width,
-            h: brickType.height,
-            hp: 2,
-            maxHp: 2,
-            name: type,
-            breakTimer: null,
-            isBreaking: false,
-            hitCount: 0 // 액자 맞은 횟수 추적
-        });
+        // Check spacing with existing bricks
+        let tooClose = false;
+        for (const brick of bricks) {
+            const dx = adjustedX - brick.x;
+            const dy = adjustedY - brick.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < minSpacing) {
+                tooClose = true;
+                break;
+            }
+        }
+        
+        if (!tooClose) {
+            bricks.push({
+                x: adjustedX,
+                y: adjustedY,
+                w: brickType.width,
+                h: brickType.height,
+                hp: 2,
+                maxHp: 2,
+                name: type,
+                breakTimer: null,
+                isBreaking: false,
+                hitCount: 0
+            });
+        }
+        
+        attempts++;
     }
 }
 
