@@ -115,6 +115,11 @@ $(document).ready(function () {
     // SKIP/게임 시작 버튼 클릭 시 즉시 닫힘
     $('#skip-btn').click(function () {
         $('#intro-modal').fadeOut(200, function () {
+            // 배경음악 재생
+            const bgm = document.getElementById('bgm');
+            bgm.volume = 0.5;
+            bgm.play();
+            
             if (typeof setLevelAndStart === 'function') setLevelAndStart();
             startGameTimer();
         });

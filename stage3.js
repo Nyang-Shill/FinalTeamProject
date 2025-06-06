@@ -74,14 +74,17 @@ $(document).ready(function () {
     // 인트로 팝업 자동 표시
     $('#intro-modal').fadeIn(200);
 
-    // SKIP 버튼 클릭 시 즉시 닫힘
+    // SKIP/게임 시작 버튼 클릭 시 즉시 닫힘
     $('#skip-btn').click(function () {
-        if ($('#intro-modal').is(':visible')) {
-            $('#intro-modal').fadeOut(200, function () {
-                if (typeof setLevelAndStart === 'function') setLevelAndStart();
-                startGameTimer();
-            });
-        }
+        $('#intro-modal').fadeOut(200, function () {
+            // 배경음악 재생
+            const bgm = document.getElementById('bgm');
+            bgm.volume = 0.5;
+            bgm.play();
+            
+            if (typeof setLevelAndStart === 'function') setLevelAndStart();
+            startGameTimer();
+        });
     });
 
     function getStageLevelFromFilename() {
