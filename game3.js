@@ -134,6 +134,7 @@ const breakImages = [
 ];
 
 const loadImages = () => {
+    console.log('이미지 로딩중');
     return new Promise((resolve, reject) => {
         let totalImages = [...levels.flat().map((type) => type.img), ...breakImages];
         imagesToLoad = totalImages.length;
