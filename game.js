@@ -22,8 +22,8 @@ let animationId = null;
 let isPowerUp = false;
 let powerUpTimeout = null;
 let handX = 0;
-let handDirection = 1;  // 1: 오른쪽, -1: 왼쪽
-let handSpeed = 2;  // 이동 속도
+let handDirection = 1; // 1: 오른쪽, -1: 왼쪽
+let handSpeed = 2; // 이동 속도
 const handImage = new Image();
 handImage.src = 'images/hand.png';
 
@@ -207,7 +207,7 @@ function randomPlaceBricks() {
         let brickH = Math.ceil((img.naturalHeight * scale) / cellSize);
         let tries = 0;
         let placed = false;
-      
+
         while (tries < 100 && !placed) {
             let row = Math.floor(Math.random() * (brickAreaRows - brickH));
             let col = Math.floor(Math.random() * (gridCols - brickW));
@@ -409,8 +409,9 @@ function collisionDetection() {
                             powerUpTimeout = null;
                         }, 5000);
 
-                        setTimeout(() => { brick.status = 0; }, 500);
-
+                        setTimeout(() => {
+                            brick.status = 0;
+                        }, 500);
                     }
                 } else if (brick.img === 'block_images/box1_2.PNG') {
                     if (brick.hp === 1) {
@@ -430,7 +431,9 @@ function collisionDetection() {
                             powerUpTimeout = null;
                         }, 5000);
 
-                        setTimeout(() => { brick.status = 0; }, 500);
+                        setTimeout(() => {
+                            brick.status = 0;
+                        }, 500);
                     }
                 } else if (brick.img === 'block_images/box1_3.PNG') {
                     if (brick.hp <= 0) {
@@ -448,7 +451,9 @@ function collisionDetection() {
                             powerUpTimeout = null;
                         }, 5000);
 
-                        setTimeout(() => { brick.status = 0; }, 500);
+                        setTimeout(() => {
+                            brick.status = 0;
+                        }, 500);
                     }
                 }
 
@@ -472,7 +477,7 @@ function collisionDetection() {
                         if (found) maxHp = found.hp;
                     }
                     score += maxHp;
-                    $('#score-box').text(score);
+                    $('#score-box').text('점수: ' + score);
                 }
 
                 // 모든 벽돌이 깨졌을 때 게임 클리어 처리
@@ -483,7 +488,8 @@ function collisionDetection() {
                         showClearModal();
                         cancelAnimationFrame(animationId);
                         animationId = null;
-                        if (currentLevel === 1) {  // stage2일 때 타이머도 정지
+                        if (currentLevel === 1) {
+                            // stage2일 때 타이머도 정지
                             clearInterval(timerInterval);
                         }
                     }, 1500);
@@ -510,14 +516,18 @@ function draw() {
     animationId = requestAnimationFrame(draw);
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
+
     // 파워업 상태일 때 캔버스 테두리 그리기
     if (isPowerUp) {
-        ctx.strokeStyle = '#FFD700';  // 노란색
+        ctx.strokeStyle = '#FFD700'; // 노란색
         ctx.lineWidth = 5;
         ctx.strokeRect(0, 0, canvas.width, canvas.height);
+        // 빛나는 효과를 위한 box-shadow 추가
+        canvas.style.boxShadow = '0 0 20px #FFD700, 0 0 40px rgba(255, 215, 0, 0.5)';
+    } else {
+        // 파워업이 아닐 때는 box-shadow 제거
+        canvas.style.boxShadow = 'none';
     }
-    
 
     drawBricks();
     if (!isRespawning) drawBall();
@@ -529,10 +539,10 @@ function draw() {
         const handWidth = handImage.naturalWidth / 3;
         const handHeight = handImage.naturalHeight / 3;
         const handY = canvas.height / 2 - handHeight / 2;
-        
+
         // hand 이미지 위치 업데이트
         handX += handSpeed * handDirection;
-        
+
         // 화면 경계에 도달하면 방향 전환
         if (handX + handWidth > canvas.width) {
             handX = canvas.width - handWidth;
@@ -541,26 +551,20 @@ function draw() {
             handX = 0;
             handDirection = 1;
         }
-        
+
         // hand 이미지 그리기 (캔버스 중앙 높이에 위치)
-        ctx.drawImage(
-            handImage,
-            handX,
-            handY,
-            handWidth,
-            handHeight
-        );
+        ctx.drawImage(handImage, handX, handY, handWidth, handHeight);
 
         // 공이 hand 이미지와 충돌하는지 확인
         if (!isRespawning) {
             if (x + ballRadius > handX && x - ballRadius < handX + handWidth) {
                 // 공이 hand 이미지의 하단에만 부딪히는 경우
-                if (y + ballRadius > handY + handHeight/2 && y - ballRadius < handY + handHeight) {
+                if (y + ballRadius > handY + handHeight / 2 && y - ballRadius < handY + handHeight) {
                     // 아래 방향으로 랜덤한 각도로 공을 튕겨냄 (0도 ~ 60도)
-                    const angle = (Math.random() * 60) * Math.PI / 180;
+                    const angle = (Math.random() * 60 * Math.PI) / 180;
                     const speed = Math.sqrt(dx * dx + dy * dy);
-                    dx = speed * Math.sin(angle) * (Math.random() > 0.5 ? 1 : -1);  // 좌우 방향 랜덤
-                    dy = speed * Math.cos(angle);  // 항상 아래 방향
+                    dx = speed * Math.sin(angle) * (Math.random() > 0.5 ? 1 : -1); // 좌우 방향 랜덤
+                    dy = speed * Math.cos(angle); // 항상 아래 방향
                 }
             }
         }
@@ -698,8 +702,8 @@ function restartGame() {
         powerUpTimeout = null;
     }
 
-    handX = 0;  // hand 위치 초기화
-    handDirection = 1;  // hand 방향 초기화
+    handX = 0; // hand 위치 초기화
+    handDirection = 1; // hand 방향 초기화
 
     x = canvas.width / 2;
     y = canvas.height - paddleHeight - 15;

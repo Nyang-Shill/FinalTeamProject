@@ -328,8 +328,10 @@ function collisionDetection() {
     for (let brick of bricks) {
         if (brick.status === 1) {
             if (x > brick.x && x < brick.x + brick.w && y > brick.y && y < brick.y + brick.h) {
-                dy = -dy;
-
+                const angle = (Math.random() * Math.PI) / 4 - Math.PI / 8; // -45도에서 45도 사이의 랜덤 각도
+                const speed = Math.sqrt(dx * dx + dy * dy); // 현재 속도 계산
+                dx = speed * Math.cos(angle);
+                dy = speed * Math.sin(angle);
                 // 파워업 상태일 때 hp를 2 감소, 아닐 때는 1 감소
                 if (isPowerUp) {
                     brick.hp -= 2;
@@ -469,6 +471,9 @@ function collisionDetection() {
                         }, 500);
                     }
                 } else if (brick.img.startsWith('block_images/notebook')) {
+                    score += 1;
+                    $('#score-box').text(score);
+
                     if (!brick.notebookLevel) brick.notebookLevel = 1;
                     if (!brick.notebookHitCount) brick.notebookHitCount = 0;
 
@@ -674,33 +679,6 @@ function mouseMoveHandler(e) {
     //     }
     // }
     /***************************마우스가 닿아도 벽돌이 깨짐, 끝*******************************/
-}
-
-//테스트용 함수
-function createTestBrick() {
-    // 임의의 벽돌 속성 설정
-    console.log('테스트');
-    const testBrick = {
-        img: 'block_images/glassCup_1.PNG', // 사용할 이미지
-        scale: 0.2, // 크기 조정 비율
-        hp: 1, // 내구도
-        name: '테스트 벽돌', // 벽돌 이름
-    };
-
-    const img = brickImages[testBrick.img];
-    if (!img || !img.naturalWidth || !img.complete) {
-        console.error('이미지가 아직 로드되지 않았습니다:', testBrick.img);
-        return;
-    }
-
-    // const img = brickImages[testBrick.img];
-    const brickW = Math.ceil((img.naturalWidth * testBrick.scale) / cellSize);
-    const brickH = Math.ceil((img.naturalHeight * testBrick.scale) / cellSize);
-    const row = 10; // 원하는 위치의 행
-    const col = 10; // 원하는 위치의 열
-
-    // 벽돌을 배치
-    placeBrick(row, col, 1, 1, testBrick); // 1x1 크기의 벽돌 추가
 }
 
 function restartGame() {
