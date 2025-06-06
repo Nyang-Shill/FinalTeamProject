@@ -30,11 +30,12 @@ body {
 }
   
 .logo {
-    background-color: #ddd;
-    padding: 60px 120px;
-    margin-bottom: 60px;
-    font-size: 38px;
-    font-weight: bold;
+    text-align: center;
+}
+
+.logo img {
+    max-width: 600px;
+    height: auto;
 }
   
 button {

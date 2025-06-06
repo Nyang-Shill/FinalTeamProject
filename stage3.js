@@ -61,11 +61,24 @@ $(document).ready(function () {
     updateIntroArrows();
     updateIntroSkipButton();
 
+    // SKIP/게임 시작 버튼 클릭 시 즉시 닫힘
+    $('#skip-btn').click(function () {
+        $('#intro-modal').fadeOut(200, function () {
+            // 배경음악 재생
+            const bgm = document.getElementById('bgm');
+            bgm.volume = 0.5;
+            bgm.play();
+            
+            if (typeof setLevelAndStart === 'function') setLevelAndStart();
+            startGameTimer();
+        });
+
     $('.left-arrow').click(function () {
         if (currentImageIndex > 1) {
             currentImageIndex--;
             updateIntroImage();
         }
+
     });
 
     $('.right-arrow').click(function () {
@@ -75,12 +88,6 @@ $(document).ready(function () {
         }
     });
 
-    $('#skip-btn').click(function () {
-        $('#intro-modal').fadeOut(200, function () {
-            if (typeof setLevelAndStart === 'function') setLevelAndStart();
-            startGameTimer();
-        });
-    });
 
     // 인트로 관련 함수
     function updateIntroImage() {

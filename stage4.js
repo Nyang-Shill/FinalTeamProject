@@ -232,6 +232,7 @@ function initImages() {
 
 // 게임 시작 함수
 function startGame() {
+    
     console.log("게임 시작 함수 호출됨");
     if (gameStarted) {
         console.log("이미 게임이 시작되어 있음");
@@ -393,6 +394,11 @@ $(document).ready(function() {
             if (currentImageIndex === maxImageIndex && $(this).text() === '게임 시작') {
                 // 마지막 이미지에서 '게임 시작' 버튼을 클릭했을 때만 게임 시작
                 $('#intro-modal').fadeOut(200, function() {
+                    // 배경음악 재생
+                    const bgm = document.getElementById('bgm');
+                    bgm.volume = 0.5;
+                    bgm.play();
+                    
                     console.log("인트로 모달 닫힘, 게임 시작 호출");
                     startGame();
                 });
