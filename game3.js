@@ -237,6 +237,25 @@ function randomPlaceBricks() {
     // ✅ notebook을 제외한 나머지 타입 필터링
     const nonNotebookTypes = brickTypes.filter((type) => !type.img.includes('notebook'));
 
+    for (let type of nonNotebookTypes) {
+        const img = brickImages[type.img];
+        const scale = type.scale || 1;
+        const brickW = Math.ceil((img.naturalWidth * scale) / cellSize);
+        const brickH = Math.ceil((img.naturalHeight * scale) / cellSize);
+
+        let placed = false;
+        let tries = 0;
+        while (!placed && tries < 100) {
+            const row = Math.floor(Math.random() * (brickAreaRows - brickH));
+            const col = Math.floor(Math.random() * (gridCols - brickW));
+            if (canPlaceBrick(row, col, brickW, brickH)) {
+                placeBrick(row, col, brickW, brickH, type);
+                placed = true;
+            }
+            tries++;
+        }
+    }
+
     // ✅ 나머지 벽돌 랜덤 배치
     for (let n = 0; n < 1000; n++) {
         let type = nonNotebookTypes[Math.floor(Math.random() * nonNotebookTypes.length)];
