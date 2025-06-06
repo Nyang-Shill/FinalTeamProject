@@ -1,119 +1,166 @@
 // 전역 변수 선언
 let timeLeft = 30;
 let timerInterval = null;
+let currentEndImageIndex = 1;
+const maxEndImageIndex = 6;
+let isGameEndModalShown = false;
+let currentImageIndex = 1;
+const maxImageIndex = 2;
 
 $(document).ready(function () {
+    // 테마 적용
+    if (selectedCatTheme && ['cat1', 'cat2', 'cat3'].includes(selectedCatTheme)) {
+        changeBallImage(selectedCatTheme);
+    }
+
     // 테마에 따른 배경 이미지 매핑
     const backgroundThemeMapping = {
-        'interior1': 'background1.png',
-        'interior2': 'background2.png',
-        'interior3': 'background3.png'
+        interior1: 'background1.png',
+        interior2: 'background2.png',
+        interior3: 'background3.png',
     };
 
-    // 테마에 따른 stage-title 색상 매핑
     const titleColorMapping = {
-        'interior1': '#617131',
-        'interior2': '#878A37',
-        'interior3': '#AC9903'
+        interior1: '#617131',
+        interior2: '#878A37',
+        interior3: '#AC9903',
     };
 
-    // 배경 이미지 설정
     const selectedTheme = localStorage.getItem('selectedInteriorTheme');
-    console.log('선택된 인테리어 테마:', selectedTheme);
-    
     if (selectedTheme && backgroundThemeMapping[selectedTheme]) {
         const backgroundImageName = backgroundThemeMapping[selectedTheme];
         document.body.style.backgroundImage = `url('./images/${backgroundImageName}')`;
         document.body.style.backgroundSize = 'cover';
         document.body.style.backgroundPosition = 'center';
         document.body.style.backgroundRepeat = 'no-repeat';
-        // stage-title 색상 설정
         $('.stage-title').css({
-            'color': titleColorMapping[selectedTheme],
-            'border-color': titleColorMapping[selectedTheme]
+            color: titleColorMapping[selectedTheme],
+            'border-color': titleColorMapping[selectedTheme],
         });
-        console.log("배경 이미지 설정:", backgroundImageName);
     } else {
-        // 기본 배경 이미지 설정
         document.body.style.backgroundImage = `url('./images/background1.png')`;
         document.body.style.backgroundSize = 'cover';
         document.body.style.backgroundPosition = 'center';
         document.body.style.backgroundRepeat = 'no-repeat';
-        // 기본 stage-title 색상 설정
         $('.stage-title').css({
-            'color': '#617131',
-            'border-color': '#617131'
+            color: '#617131',
+            'border-color': '#617131',
         });
-        console.log("기본 배경 이미지 설정: background1.png");
     }
 
-    // 저장된 테마 적용
-    const selectedCatTheme = localStorage.getItem('selectedCatTheme');
-    console.log('stage3에서 읽은 테마:', selectedCatTheme);
+    // // 캔버스 안내 텍스트
+    // const canvas = document.getElementById('game-canvas');
+    // const ctx = canvas.getContext('2d');
+    // ctx.font = '32px sans-serif';
+    // ctx.fillStyle = '#888';
+    // ctx.textAlign = 'center';
+    // ctx.fillText('여기서 게임이 시작됩니다!', canvas.width / 2, canvas.height / 2);
 
-    if (selectedCatTheme) {
-        if (selectedCatTheme === 'cat1' || selectedCatTheme === 'cat2' || selectedCatTheme === 'cat3') {
-            console.log('테마 적용:', selectedCatTheme);
-            changeBallImage(selectedCatTheme);
-        }
-    }
-
-    // 캔버스 안내 텍스트
-    const canvas = document.getElementById('game-canvas');
-    const ctx = canvas.getContext('2d');
-    ctx.font = '32px sans-serif';
-    ctx.fillStyle = '#888';
-    ctx.textAlign = 'center';
-    ctx.fillText('여기서 게임이 시작됩니다!', canvas.width / 2, canvas.height / 2);
-
-    // 인트로 팝업 자동 표시
+    // 인트로 팝업
     $('#intro-modal').fadeIn(200);
+    updateIntroArrows();
+    updateIntroSkipButton();
 
-    // 5초 후 자동 닫힘
-    let introTimeout = setTimeout(function () {
-        $('#intro-modal').fadeOut(200, function () {
-            if (typeof setLevelAndStart === 'function') setLevelAndStart();
-            startGameTimer();
-        });
-    }, 5000);
+    $('.left-arrow').click(function () {
+        if (currentImageIndex > 1) {
+            currentImageIndex--;
+            updateIntroImage();
+        }
+    });
 
-    // SKIP 버튼 클릭 시 즉시 닫힘
+    $('.right-arrow').click(function () {
+        if (currentImageIndex < maxImageIndex) {
+            currentImageIndex++;
+            updateIntroImage();
+        }
+    });
+
     $('#skip-btn').click(function () {
         $('#intro-modal').fadeOut(200, function () {
             if (typeof setLevelAndStart === 'function') setLevelAndStart();
             startGameTimer();
         });
-        clearTimeout(introTimeout);
     });
 
-    function getStageLevelFromFilename() {
-        const match = window.location.pathname.match(/stage(\d+)/);
-        if (match) {
-            return parseInt(match[1], 10) - 1;
-        }
-        return 0;
+    // 인트로 관련 함수
+    function updateIntroImage() {
+        const introImage = $('#intro-modal .intro-image');
+        introImage.fadeOut(200, function () {
+            introImage.attr('src', `scenes_images/stage3_${currentImageIndex}.png`);
+            introImage.fadeIn(200);
+            updateIntroArrows();
+            updateIntroSkipButton();
+        });
     }
 
-    function setLevelAndStart() {
-        if (typeof currentLevel !== 'undefined') {
-            currentLevel = getStageLevelFromFilename();
-            brickTypes = levels[currentLevel];
-            randomPlaceBricks();
-        }
-        if (typeof startGame === 'function') startGame();
+    function updateIntroArrows() {
+        $('.left-arrow').css('visibility', currentImageIndex === 1 ? 'hidden' : 'visible');
+        $('.right-arrow').css('visibility', currentImageIndex === maxImageIndex ? 'hidden' : 'visible');
     }
 
-    let currentImageIndex = 1;
-    const maxImageIndex = 2;
+    function updateIntroSkipButton() {
+        $('#skip-btn').text(currentImageIndex === maxImageIndex ? '게임 시작' : 'SKIP');
+    }
 
-    // 인트로 모달 표시
-    $('#intro-modal').show();
-    updateArrowVisibility();
-    updateSkipButton();
+    // 게임 종료 관련 함수
+    function updateEndImage() {
+        const endImage = $('#game-end-modal .intro-image');
+        endImage.fadeOut(200, function () {
+            endImage.attr('src', `scenes_images/stage3_end_${currentEndImageIndex}.png`);
+            endImage.fadeIn(200);
+            updateEndArrows();
+        });
+    }
 
-    // 제한시간 타이머
-    let timeLeft = 30;
-    let timerInterval = null;
+    function updateEndArrows() {
+        $('.left-arrow', '#game-end-modal').css('visibility', currentEndImageIndex === 1 ? 'hidden' : 'visible');
+        $('.right-arrow', '#game-end-modal').css(
+            'visibility',
+            currentEndImageIndex === maxEndImageIndex ? 'hidden' : 'visible'
+        );
+        $('#game-end-modal #skip-btn').text(currentEndImageIndex === maxEndImageIndex ? '다음' : 'SKIP');
+    }
+
+    $('#game-end-modal .left-arrow').click(function () {
+        if (currentEndImageIndex > 1) {
+            currentEndImageIndex--;
+            updateEndImage();
+        }
+    });
+
+    $('#game-end-modal .right-arrow').click(function () {
+        if (currentEndImageIndex < maxEndImageIndex) {
+            currentEndImageIndex++;
+            updateEndImage();
+        }
+    });
+
+    $('#game-end-modal #skip-btn').click(function () {
+        $('#game-end-modal').fadeOut(200, function () {
+            setTimeout(() => {
+                $('#clear-modal').fadeIn(200);
+            }, 100);
+        });
+    });
+
+    // function startGameTimer() {
+    //     $('#time-remaining').text(timeLeft);
+    //     timerInterval = setInterval(function () {
+    //         timeLeft--;
+    //         $('#time-remaining').text(timeLeft);
+    //         if (timeLeft <= 0) {
+    //             clearInterval(timerInterval);
+    //             if (!isGameEndModalShown) {
+    //                 isGameEndModalShown = true;
+    //                 $('#intro-modal').hide();
+    //                 currentEndImageIndex = 1;
+    //                 updateEndImage();
+    //                 updateEndArrows();
+    //                 $('#game-end-modal').fadeIn(200);
+    //             }
+    //         }
+    //     }, 1000);
+    // }
 
     function startGameTimer() {
         $('#time-remaining').text(timeLeft);
@@ -127,114 +174,62 @@ $(document).ready(function () {
         }, 1000);
     }
 
-    // 스테이지 클리어 팝업 표시
+    function checkGameEnd() {
+        if (bricks.length === 0) {
+            setTimeout(() => {
+                if (!isGameEndModalShown) {
+                    isGameEndModalShown = true;
+                    $('#intro-modal').hide();
+                    currentEndImageIndex = 1;
+                    updateEndImage();
+                    updateEndArrows();
+                    $('#game-end-modal').fadeIn(200);
+                }
+            }, 1500);
+        }
+    }
+
     function showClearModal() {
         $('.clear-score-btn').text(`점수: ${score}`);
         $('#clear-modal').fadeIn(200);
     }
 
-    // 팝업 버튼 동작
     $('.clear-next-btn').click(function () {
         window.location.href = 'stage4.html';
     });
+
     $('.clear-home-btn').click(function () {
         window.location.href = 'home.html';
     });
 
-    // 왼쪽 화살표 클릭
-    $('.left-arrow').click(function() {
-        if (currentImageIndex > 1) {
-            currentImageIndex--;
-            updateImage();
-            updateArrowVisibility();
-            updateSkipButton();
-        }
-    });
-    
-    // 오른쪽 화살표 클릭
-    $('.right-arrow').click(function() {
-        if (currentImageIndex < maxImageIndex) {
-            currentImageIndex++;
-            updateImage();
-            updateArrowVisibility();
-            updateSkipButton();
-        }
-    });
-    
-    // SKIP/게임시작 버튼 클릭
-    $('#skip-btn').click(function() {
-        $('#intro-modal').hide();
-        startGameTimer();
-    });
-    
-    // 이미지 업데이트 함수
-    function updateImage() {
-        $('.intro-image').attr('src', `scenes_images/stage3_${currentImageIndex}.png`);
+    function getStageLevelFromFilename() {
+        const match = window.location.pathname.match(/stage(\d+)/);
+        return match ? parseInt(match[1], 10) - 1 : 0;
     }
 
-    // 화살표 가시성 업데이트 함수
-    function updateArrowVisibility() {
-        if (currentImageIndex === 1) {
-            $('.left-arrow').css('visibility', 'hidden');
-        } else {
-            $('.left-arrow').css('visibility', 'visible');
+    function setLevelAndStart() {
+        if (typeof currentLevel !== 'undefined') {
+            currentLevel = getStageLevelFromFilename();
+            brickTypes = levels[currentLevel];
+            randomPlaceBricks();
         }
-
-        if (currentImageIndex === maxImageIndex) {
-            $('.right-arrow').css('visibility', 'hidden');
-        } else {
-            $('.right-arrow').css('visibility', 'visible');
-        }
-    }
-
-    // SKIP/게임시작 버튼 업데이트 함수
-    function updateSkipButton() {
-        if (currentImageIndex === maxImageIndex) {
-            $('#skip-btn').text('게임시작');
-        } else {
-            $('#skip-btn').text('SKIP');
-        }
+        if (typeof startGame === 'function') startGame();
     }
 });
 
-// 게임 시작 함수
-function startGame() {
-    console.log('Game started');
-}
-
-// 게임 초기화 함수
 function initGame() {
-    console.log("게임 초기화 시작");
-    
-    // 캔버스 초기화
+    console.log('게임 초기화 시작');
     canvas = document.getElementById('game-canvas');
-    if (!canvas) {
-        console.error('Canvas element not found!');
-        return;
-    }
-    
+    if (!canvas) return console.error('Canvas element not found!');
     ctx = canvas.getContext('2d');
-    if (!ctx) {
-        console.error('Could not get canvas context!');
-        return;
-    }
-    
-    // 캔버스 크기 설정
+    if (!ctx) return console.error('Could not get canvas context!');
     canvas.width = 800;
     canvas.height = 600;
-    
-    // 캔버스 스타일 설정
     canvas.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
-    
-    // 게임 변수 초기화
     centerX = canvas.width / 2;
     centerY = canvas.height / 2;
     score = 0;
     timeLeft = 30;
-    
-    // 이벤트 리스너 설정
     setupEventListeners();
-    
-    // 이미지 초기화
     initImages();
 }

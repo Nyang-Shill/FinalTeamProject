@@ -16,7 +16,7 @@ $(document).ready(function () {
     // 배경 이미지 설정
     const selectedTheme = localStorage.getItem('selectedInteriorTheme');
     console.log('선택된 인테리어 테마:', selectedTheme);
-    
+
     if (selectedTheme && backgroundThemeMapping[selectedTheme]) {
         const backgroundImageName = backgroundThemeMapping[selectedTheme];
         document.body.style.backgroundImage = `url('./images/${backgroundImageName}')`;
@@ -25,10 +25,12 @@ $(document).ready(function () {
         document.body.style.backgroundRepeat = 'no-repeat';
         // stage-title 색상 설정
         $('.stage-title').css({
+
             'color': titleColorMapping[selectedTheme],
             'border-color': titleColorMapping[selectedTheme]
         });
         console.log("배경 이미지 설정:", backgroundImageName);
+
     } else {
         // 기본 배경 이미지 설정
         document.body.style.backgroundImage = `url('./images/background1.png')`;
@@ -37,6 +39,7 @@ $(document).ready(function () {
         document.body.style.backgroundRepeat = 'no-repeat';
         // 기본 stage-title 색상 설정
         $('.stage-title').css({
+
             'color': '#617131',
             'border-color': '#617131'
         });
@@ -63,7 +66,7 @@ $(document).ready(function () {
     // ctx.fillText('여기서 게임이 시작됩니다!', canvas.width / 2, canvas.height / 2);
     // 현재 이미지 인덱스 관리
     let currentImageIndex = 1;
-    const maxImageIndex = 3;  // 최대 이미지 번호
+    const maxImageIndex = 3; // 최대 이미지 번호
 
     // 화살표 표시/숨김 업데이트 함수
     function updateArrows() {
@@ -85,15 +88,15 @@ $(document).ready(function () {
     // 이미지 변경 함수
     function changeImage(index) {
         const introImage = $('.intro-image');
-        introImage.fadeOut(200, function() {
+        introImage.fadeOut(200, function () {
             introImage.attr('src', `scenes_images/stage2_${index}.png`);
             introImage.fadeIn(200);
-            updateArrows();  // 이미지 변경 후 화살표 상태 업데이트
+            updateArrows(); // 이미지 변경 후 화살표 상태 업데이트
         });
     }
 
     // 오른쪽 화살표 클릭 이벤트
-    $('.right-arrow').click(function() {
+    $('.right-arrow').click(function () {
         if (currentImageIndex < maxImageIndex) {
             currentImageIndex++;
             changeImage(currentImageIndex);
@@ -101,7 +104,7 @@ $(document).ready(function () {
     });
 
     // 왼쪽 화살표 클릭 이벤트
-    $('.left-arrow').click(function() {
+    $('.left-arrow').click(function () {
         if (currentImageIndex > 1) {
             currentImageIndex--;
             changeImage(currentImageIndex);
@@ -110,7 +113,7 @@ $(document).ready(function () {
 
     // 인트로 팝업 자동 표시
     $('#intro-modal').fadeIn(200);
-    updateArrows();  // 초기 화살표 상태 설정
+    updateArrows(); // 초기 화살표 상태 설정
 
     // SKIP/게임 시작 버튼 클릭 시 즉시 닫힘
     $('#skip-btn').click(function () {
@@ -165,7 +168,6 @@ $(document).ready(function () {
     }
 
     function setLevelAndStart() {
-
         currentLevel = getStageLevelFromFilename();
         brickTypes = levels[currentLevel];
         bricks = [];
@@ -177,20 +179,23 @@ $(document).ready(function () {
 
     // 게임 초기화 함수
     function initGame() {
+
         console.log("게임 초기화 시작");
         
+
         // 캔버스 초기화
         canvas = document.getElementById('game-canvas');
         if (!canvas) {
             console.error('Canvas element not found!');
             return;
         }
-        
+
         ctx = canvas.getContext('2d');
         if (!ctx) {
             console.error('Could not get canvas context!');
             return;
         }
+
         
         // 캔버스 크기 설정
         canvas.width = 800;
@@ -199,6 +204,7 @@ $(document).ready(function () {
         // 캔버스 스타일 설정
         canvas.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
         
+
         // 게임 변수 초기화
         centerX = canvas.width / 2;
         centerY = canvas.height / 2;
@@ -207,7 +213,7 @@ $(document).ready(function () {
         
         // 이벤트 리스너 설정
         setupEventListeners();
-        
+
         // 이미지 초기화
         initImages();
     }

@@ -134,6 +134,7 @@ const breakImages = [
 ];
 
 const loadImages = () => {
+    console.log('이미지 로딩중');
     return new Promise((resolve, reject) => {
         let totalImages = [...levels.flat().map((type) => type.img), ...breakImages];
         imagesToLoad = totalImages.length;
@@ -237,6 +238,25 @@ function randomPlaceBricks() {
     // ✅ notebook을 제외한 나머지 타입 필터링
     const nonNotebookTypes = brickTypes.filter((type) => !type.img.includes('notebook'));
 
+    for (let type of nonNotebookTypes) {
+        const img = brickImages[type.img];
+        const scale = type.scale || 1;
+        const brickW = Math.ceil((img.naturalWidth * scale) / cellSize);
+        const brickH = Math.ceil((img.naturalHeight * scale) / cellSize);
+
+        let placed = false;
+        let tries = 0;
+        while (!placed && tries < 100) {
+            const row = Math.floor(Math.random() * (brickAreaRows - brickH));
+            const col = Math.floor(Math.random() * (gridCols - brickW));
+            if (canPlaceBrick(row, col, brickW, brickH)) {
+                placeBrick(row, col, brickW, brickH, type);
+                placed = true;
+            }
+            tries++;
+        }
+    }
+
     // ✅ 나머지 벽돌 랜덤 배치
     for (let n = 0; n < 1000; n++) {
         let type = nonNotebookTypes[Math.floor(Math.random() * nonNotebookTypes.length)];
@@ -314,23 +334,43 @@ function drawPaddle() {
     }
 }
 
-// function showClearModal() {
-//     if (animationId) {
-//         cancelAnimationFrame(animationId);
-//         animationId = null;
-//     }
-//     clearInterval(timerInterval); // 타이머도 정지
-//     $('.clear-score-btn').text(`점수: ${score}`);
-//     $('#clear-modal').fadeIn(200);
-// }
+function showClearModal() {
+    if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+    }
+    clearInterval(timerInterval); // 타이머도 정지
+    $('.clear-score-btn').text(`점수: ${score}`);
+    $('#clear-modal').fadeIn(200);
+}
 
 function collisionDetection() {
     for (let brick of bricks) {
         if (brick.status === 1) {
             if (x > brick.x && x < brick.x + brick.w && y > brick.y && y < brick.y + brick.h) {
-                dy = -dy;
+                const overlapLeft = Math.abs(x + ballRadius - brick.x);
+                const overlapRight = Math.abs(brick.x + brick.w - (x - ballRadius));
+                const overlapTop = Math.abs(y + ballRadius - brick.y);
+                const overlapBottom = Math.abs(brick.y + brick.h - (y - ballRadius));
 
-                // 파워업 상태일 때 hp를 2 감소, 아닐 때는 1 감소
+                const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+
+                if (minOverlap === overlapLeft || minOverlap === overlapRight) {
+                    // 좌우 충돌: 수평 방향 반전
+                    dx = -dx;
+                } else {
+                    // 상하 충돌: 수직 방향 반전
+                    dy = -dy;
+                }
+
+                // speed 유지
+                const speed = Math.sqrt(dx * dx + dy * dy);
+                const angleVariation = (Math.random() - 0.5) * (Math.PI / 12); // ±15도 흔들림
+                const angle = Math.atan2(dy, dx) + angleVariation;
+
+                dx = speed * Math.cos(angle);
+                dy = speed * Math.sin(angle);
+
                 if (isPowerUp) {
                     brick.hp -= 2;
                 } else {
@@ -469,6 +509,9 @@ function collisionDetection() {
                         }, 500);
                     }
                 } else if (brick.img.startsWith('block_images/notebook')) {
+                    score += 1;
+                    $('#score-box').text(score);
+
                     if (!brick.notebookLevel) brick.notebookLevel = 1;
                     if (!brick.notebookHitCount) brick.notebookHitCount = 0;
 
@@ -528,7 +571,7 @@ function collisionDetection() {
                     setTimeout(() => {
                         console.log('1.5초간 기다립니다.');
                         isGameClear = true;
-                        // showClearModal(); // 클리어 모달 띄움
+                        showClearModal(); // 클리어 모달 띄움
                         cancelAnimationFrame(animationId); // 애니메이션 중단
                         animationId = null;
                         if (currentLevel === 2) {
@@ -577,6 +620,13 @@ function draw() {
     if (!isRespawning) drawBall();
     drawPaddle();
     collisionDetection();
+    if (timeLeft <= 0) {
+        isGameOver = true;
+        console.log('게임 오버');
+        showClearModal();
+        cancelAnimationFrame(animationId);
+        animationId = null;
+    }
 
     if (isRespawning) return;
 
@@ -672,33 +722,6 @@ function mouseMoveHandler(e) {
     //     }
     // }
     /***************************마우스가 닿아도 벽돌이 깨짐, 끝*******************************/
-}
-
-//테스트용 함수
-function createTestBrick() {
-    // 임의의 벽돌 속성 설정
-    console.log('테스트');
-    const testBrick = {
-        img: 'block_images/glassCup_1.PNG', // 사용할 이미지
-        scale: 0.2, // 크기 조정 비율
-        hp: 1, // 내구도
-        name: '테스트 벽돌', // 벽돌 이름
-    };
-
-    const img = brickImages[testBrick.img];
-    if (!img || !img.naturalWidth || !img.complete) {
-        console.error('이미지가 아직 로드되지 않았습니다:', testBrick.img);
-        return;
-    }
-
-    // const img = brickImages[testBrick.img];
-    const brickW = Math.ceil((img.naturalWidth * testBrick.scale) / cellSize);
-    const brickH = Math.ceil((img.naturalHeight * testBrick.scale) / cellSize);
-    const row = 10; // 원하는 위치의 행
-    const col = 10; // 원하는 위치의 열
-
-    // 벽돌을 배치
-    placeBrick(row, col, 1, 1, testBrick); // 1x1 크기의 벽돌 추가
 }
 
 function restartGame() {
