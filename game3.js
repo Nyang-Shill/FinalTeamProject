@@ -173,6 +173,7 @@ loadImages().then(() => {
 });
 
 function startGame() {
+    console.log("게임시작")
     if (gameStarted) return;
     gameStarted = true;
     document.addEventListener('keydown', keyDownHandler, false);
