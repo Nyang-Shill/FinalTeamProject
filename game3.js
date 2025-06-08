@@ -173,7 +173,7 @@ loadImages().then(() => {
 });
 
 function startGame() {
-    console.log("게임시작")
+    console.log('게임시작');
     if (gameStarted) return;
     gameStarted = true;
     document.addEventListener('keydown', keyDownHandler, false);
@@ -510,7 +510,7 @@ function collisionDetection() {
                         }, 500);
                     }
                 } else if (brick.img.startsWith('block_images/notebook')) {
-                    score += 1;
+                    score += 5;
                     $('#score-box').text(score);
 
                     if (!brick.notebookLevel) brick.notebookLevel = 1;
@@ -548,22 +548,16 @@ function collisionDetection() {
                 // 벽돌이 깨질 때, 해당 벽돌의 최초 hp만큼 점수 증가
                 if (brick.hp <= 0) {
                     let maxHp = 1;
-                    if (currentLevel === 1) {
-                        // stage2일 때
-                        if (brick.img.includes('glassCup_1')) {
-                            maxHp = 1; // 유리컵: 1점
-                        } else if (brick.img.includes('plate2_')) {
-                            maxHp = 2; // 그릇: 2점
-                        } else if (brick.img.includes('frame1_')) {
-                            maxHp = 2; // 액자: 2점
-                        } else if (brick.img.includes('box1_')) {
-                            maxHp = 3; // 택배박스: 3점
-                        }
-                    } else {
-                        // stage1일 때는 기존 로직 유지
-                        const found = levels[currentLevel].find((t) => t.img === brick.img);
-                        if (found) maxHp = found.hp;
+
+                    // stage2일 때
+                    if (brick.img.includes('glassCup_1')) {
+                        maxHp = 1; // 유리컵: 1점
+                    } else if (brick.img.includes('plate2_')) {
+                        maxHp = 2; // 그릇: 2점
+                    } else if (brick.img.includes('frame1_')) {
+                        maxHp = 2; // 액자: 2점
                     }
+
                     score += maxHp;
                     $('#score-box').text('점수: ' + score);
                 }
