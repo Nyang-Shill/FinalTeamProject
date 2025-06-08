@@ -100,7 +100,7 @@ const levels = [
         { img: 'block_images/plate2_1.PNG', scale: 0.2, hp: 2, name: '그릇' },
         { img: 'block_images/frame1_1.PNG', scale: 0.4, hp: 2, name: '액자' },
         { img: 'block_images/box1_1.PNG', scale: 0.4, hp: 3, name: '택배박스' },
-        { img: 'block_images/notebook1.PNG', scale: 0.6, hp: 30, name: '노트북' },
+        { img: 'block_images/notebook1.PNG', scale: 0.6, hp: 15, name: '노트북' },
     ],
 ];
 let currentLevel = 0;
@@ -510,8 +510,10 @@ function collisionDetection() {
                         }, 500);
                     }
                 } else if (brick.img.startsWith('block_images/notebook')) {
-                    score += 5;
-                    $('#score-box').text(score);
+                    if (isPowerUp) score += 10;
+                    else score += 5;
+                    console.log(brick.hp);
+                    $('#score-box').text('점수: ' + score);
 
                     if (!brick.notebookLevel) brick.notebookLevel = 1;
                     if (!brick.notebookHitCount) brick.notebookHitCount = 0;
@@ -529,27 +531,16 @@ function collisionDetection() {
 
                     // notebook 레벨 업 처리
                     brick.notebookHitCount++;
-                    if (brick.notebookLevel < 3 && brick.notebookHitCount >= 10) {
+                    if (brick.notebookLevel < 3 && brick.notebookHitCount >= 5) {
                         brick.notebookLevel++;
                         brick.notebookHitCount = 0;
                         brick.img = `block_images/notebook${brick.notebookLevel}.PNG`;
                     }
-
-                    // notebook3이면 깨짐
-                    // if (brick.notebookLevel === 3 && brick.hp <= 0) {
-                    //     brick.breakImg = 'block_images/notebook_4.PNG';
-                    //     brick.status = 2;
-                    //     setTimeout(() => {
-                    //         brick.status = 0;
-                    //     }, 300);
-                    // }
                 }
 
                 // 벽돌이 깨질 때, 해당 벽돌의 최초 hp만큼 점수 증가
                 if (brick.hp <= 0) {
                     let maxHp = 1;
-
-                    // stage2일 때
                     if (brick.img.includes('glassCup_1')) {
                         maxHp = 1; // 유리컵: 1점
                     } else if (brick.img.includes('plate2_')) {
@@ -669,54 +660,6 @@ function keyUpHandler(e) {
 function mouseMoveHandler(e) {
     let relativeX = e.clientX - canvas.getBoundingClientRect().left;
     if (relativeX > 0 && relativeX < canvas.width) paddleX = relativeX - paddleWidth / 2;
-
-    /***************************마우스가 닿아도 벽돌이 깨짐, 시작*******************************/
-    // let relativeY = e.clientY - canvas.getBoundingClientRect().top;
-
-    // if (relativeX > 0 && relativeX < canvas.width) {
-    //     paddleX = relativeX - paddleWidth / 2;
-    // }
-
-    // for (let brick of bricks) {
-    //     if (brick.status === 1) {
-    //         if (
-    //             relativeX >= brick.x &&
-    //             relativeX <= brick.x + brick.w &&
-    //             relativeY >= brick.y &&
-    //             relativeY <= brick.y + brick.h
-    //         ) {
-    //             brick.hp--;
-    //             if (brick.hp <= 0) {
-    //                 brick.status = 2;
-    //                 brick.breakStartTime = Date.now();
-    //                 if (brick.img.includes('glassCup_1')) {
-    //                     brick.breakImg = 'block_images/glassCup_2.PNG';
-    //                 } else if (brick.img.includes('plate1_1')) {
-    //                     brick.breakImg = 'block_images/plate1_2.PNG';
-    //                 } else if (brick.img.includes('frame2_1')) {
-    //                     brick.breakImg = 'block_images/frame2_2.PNG';
-    //                 }
-    //                 setTimeout(() => {
-    //                     brick.status = 0;
-    //                 }, 300);
-
-    //                 const maxHp = levels[currentLevel].find((t) => t.img === brick.img).hp;
-    //                 score += maxHp;
-    //                 $('#score-box').text(score);
-
-    //                 if (isAllBricksCleared()) {
-    //                     setTimeout(() => {
-    //                         isGameClear = true;
-    //                         showClearModal();
-    //                         cancelAnimationFrame(animationId);
-    //                         animationId = null;
-    //                     }, 3000);
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-    /***************************마우스가 닿아도 벽돌이 깨짐, 끝*******************************/
 }
 
 function restartGame() {
